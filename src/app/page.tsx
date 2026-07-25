@@ -1,65 +1,109 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Brain, BarChart3, Trophy } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="flex min-h-screen flex-col bg-surface">
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="WordPal logo" className="w-8 h-8" />
+          <span className="font-display text-xl font-bold" style={{ color: '#FE669A' }}>
+            WordPal
+          </span>
+        </div>
+        <Link
+          href="/auth/signin"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Sign In
+        </Link>
+      </header>
+
+      {/* Hero Section */}
+      <main className="flex flex-1 flex-col items-center justify-center px-6 py-16">
+        <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
+          <img src="/logo.png" alt="WordPal" className="w-24 h-24 mb-6" />
+          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4" style={{ color: '#FE669A' }}>
+            WordPal
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8">
+            Build English, Block by Block
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 bg-wp-primary hover:bg-wp-primary-hover text-white font-semibold text-lg px-8 py-4 rounded-lg transition-colors shadow-lg hover:shadow-xl"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            ▶ Start Learning
+          </Link>
         </div>
+
+        {/* Demo Blocks */}
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-3">
+          <div className="bg-block-subject text-white font-semibold px-5 py-3 rounded-lg shadow-[var(--shadow-block)] text-lg">
+            The
+          </div>
+          <div className="bg-block-object text-white font-semibold px-5 py-3 rounded-lg shadow-[var(--shadow-block)] text-lg">
+            cat
+          </div>
+          <div className="bg-block-verb text-white font-semibold px-5 py-3 rounded-lg shadow-[var(--shadow-block)] text-lg">
+            sat
+          </div>
+          <div className="bg-block-modifier text-white font-semibold px-5 py-3 rounded-lg shadow-[var(--shadow-block)] text-lg">
+            on
+          </div>
+        </div>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Color-coded grammar blocks make learning intuitive
+        </p>
+
+        {/* Feature Highlights */}
+        <section className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl w-full">
+          <div className="flex flex-col items-center text-center p-6 rounded-xl bg-surface-card shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow">
+            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-block-subject-light mb-4">
+              <Brain className="w-7 h-7 text-block-subject" />
+            </div>
+            <h3 className="font-semibold text-foreground text-lg mb-2">
+              AI Feedback
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Get instant, intelligent feedback on your sentence constructions
+              powered by Amazon Bedrock.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center text-center p-6 rounded-xl bg-surface-card shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow">
+            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-block-object-light mb-4">
+              <BarChart3 className="w-7 h-7 text-block-object" />
+            </div>
+            <h3 className="font-semibold text-foreground text-lg mb-2">
+              Progress Tracking
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Track your learning journey with detailed progress across lessons
+              and exercises.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center text-center p-6 rounded-xl bg-surface-card shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow">
+            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-block-modifier-light mb-4">
+              <Trophy className="w-7 h-7 text-block-modifier" />
+            </div>
+            <h3 className="font-semibold text-foreground text-lg mb-2">
+              Gamification
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Earn achievements, climb the leaderboard, and stay motivated
+              through friendly competition.
+            </p>
+          </div>
+        </section>
       </main>
+
+      {/* Footer */}
+      <footer className="py-6 text-center text-sm text-muted-foreground">
+        Built with ❤️ for the AWS Hackathon
+      </footer>
     </div>
   );
 }

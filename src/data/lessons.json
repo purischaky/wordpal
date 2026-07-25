@@ -1,0 +1,228 @@
+[
+  {
+    "id": "lesson-1",
+    "title": "Simple Present",
+    "description": "Learn to build sentences using the simple present tense.",
+    "order": 1,
+    "grammarConcept": "simple_present",
+    "exercises": [
+      {
+        "id": "ex-1-1",
+        "order": 1,
+        "targetSentence": "I like cats",
+        "blocks": [
+          { "id": "block-1-1-1", "label": "I", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-1-1-2", "label": "like", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-1-1-3", "label": "cats", "category": "object", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-1-1-4", "label": "run", "category": "verb", "isDistractor": true, "sourceOrder": 4 }
+        ]
+      },
+      {
+        "id": "ex-1-2",
+        "order": 2,
+        "targetSentence": "She runs fast",
+        "blocks": [
+          { "id": "block-1-2-1", "label": "She", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-1-2-2", "label": "runs", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-1-2-3", "label": "fast", "category": "modifier", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-1-2-4", "label": "slowly", "category": "modifier", "isDistractor": true, "sourceOrder": 4 },
+          { "id": "block-1-2-5", "label": "he", "category": "subject", "isDistractor": true, "sourceOrder": 5 }
+        ]
+      },
+      {
+        "id": "ex-1-3",
+        "order": 3,
+        "targetSentence": "The dog eats food",
+        "blocks": [
+          { "id": "block-1-3-1", "label": "The", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-1-3-2", "label": "dog", "category": "subject", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-1-3-3", "label": "eats", "category": "verb", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-1-3-4", "label": "food", "category": "object", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-1-3-5", "label": "drinks", "category": "verb", "isDistractor": true, "sourceOrder": 5 },
+          { "id": "block-1-3-6", "label": "water", "category": "object", "isDistractor": true, "sourceOrder": 6 }
+        ]
+      },
+      {
+        "id": "ex-1-4",
+        "order": 4,
+        "targetSentence": "They play games every day",
+        "blocks": [
+          { "id": "block-1-4-1", "label": "They", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-1-4-2", "label": "play", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-1-4-3", "label": "games", "category": "object", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-1-4-4", "label": "every", "category": "time", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-1-4-5", "label": "day", "category": "time", "isDistractor": false, "sourceOrder": 5 },
+          { "id": "block-1-4-6", "label": "night", "category": "time", "isDistractor": true, "sourceOrder": 6 },
+          { "id": "block-1-4-7", "label": "watch", "category": "verb", "isDistractor": true, "sourceOrder": 7 }
+        ]
+      },
+      {
+        "id": "ex-1-5",
+        "order": 5,
+        "targetSentence": "My friend reads books at night",
+        "blocks": [
+          { "id": "block-1-5-1", "label": "My", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-1-5-2", "label": "friend", "category": "subject", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-1-5-3", "label": "reads", "category": "verb", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-1-5-4", "label": "books", "category": "object", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-1-5-5", "label": "at", "category": "time", "isDistractor": false, "sourceOrder": 5 },
+          { "id": "block-1-5-6", "label": "night", "category": "time", "isDistractor": false, "sourceOrder": 6 },
+          { "id": "block-1-5-7", "label": "writes", "category": "verb", "isDistractor": true, "sourceOrder": 7 },
+          { "id": "block-1-5-8", "label": "always", "category": "modifier", "isDistractor": true, "sourceOrder": 8 },
+          { "id": "block-1-5-9", "label": "her", "category": "subject", "isDistractor": true, "sourceOrder": 9 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson-2",
+    "title": "Simple Past",
+    "description": "Learn to build sentences using the simple past tense.",
+    "order": 2,
+    "grammarConcept": "simple_past",
+    "exercises": [
+      {
+        "id": "ex-2-1",
+        "order": 1,
+        "targetSentence": "I walked home",
+        "blocks": [
+          { "id": "block-2-1-1", "label": "I", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-2-1-2", "label": "walked", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-2-1-3", "label": "home", "category": "place", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-2-1-4", "label": "ran", "category": "verb", "isDistractor": true, "sourceOrder": 4 }
+        ]
+      },
+      {
+        "id": "ex-2-2",
+        "order": 2,
+        "targetSentence": "She cooked dinner",
+        "blocks": [
+          { "id": "block-2-2-1", "label": "She", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-2-2-2", "label": "cooked", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-2-2-3", "label": "dinner", "category": "object", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-2-2-4", "label": "lunch", "category": "object", "isDistractor": true, "sourceOrder": 4 },
+          { "id": "block-2-2-5", "label": "he", "category": "subject", "isDistractor": true, "sourceOrder": 5 }
+        ]
+      },
+      {
+        "id": "ex-2-3",
+        "order": 3,
+        "targetSentence": "The cat slept quietly",
+        "blocks": [
+          { "id": "block-2-3-1", "label": "The", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-2-3-2", "label": "cat", "category": "subject", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-2-3-3", "label": "slept", "category": "verb", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-2-3-4", "label": "quietly", "category": "modifier", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-2-3-5", "label": "ate", "category": "verb", "isDistractor": true, "sourceOrder": 5 },
+          { "id": "block-2-3-6", "label": "slowly", "category": "modifier", "isDistractor": true, "sourceOrder": 6 }
+        ]
+      },
+      {
+        "id": "ex-2-4",
+        "order": 4,
+        "targetSentence": "We watched a movie yesterday",
+        "blocks": [
+          { "id": "block-2-4-1", "label": "We", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-2-4-2", "label": "watched", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-2-4-3", "label": "a", "category": "modifier", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-2-4-4", "label": "movie", "category": "object", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-2-4-5", "label": "yesterday", "category": "time", "isDistractor": false, "sourceOrder": 5 },
+          { "id": "block-2-4-6", "label": "today", "category": "time", "isDistractor": true, "sourceOrder": 6 },
+          { "id": "block-2-4-7", "label": "played", "category": "verb", "isDistractor": true, "sourceOrder": 7 }
+        ]
+      },
+      {
+        "id": "ex-2-5",
+        "order": 5,
+        "targetSentence": "They finished their homework last night",
+        "blocks": [
+          { "id": "block-2-5-1", "label": "They", "category": "subject", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-2-5-2", "label": "finished", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-2-5-3", "label": "their", "category": "modifier", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-2-5-4", "label": "homework", "category": "object", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-2-5-5", "label": "last", "category": "time", "isDistractor": false, "sourceOrder": 5 },
+          { "id": "block-2-5-6", "label": "night", "category": "time", "isDistractor": false, "sourceOrder": 6 },
+          { "id": "block-2-5-7", "label": "started", "category": "verb", "isDistractor": true, "sourceOrder": 7 },
+          { "id": "block-2-5-8", "label": "quickly", "category": "modifier", "isDistractor": true, "sourceOrder": 8 },
+          { "id": "block-2-5-9", "label": "we", "category": "subject", "isDistractor": true, "sourceOrder": 9 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lesson-3",
+    "title": "Questions",
+    "description": "Learn to build question sentences in English.",
+    "order": 3,
+    "grammarConcept": "questions",
+    "exercises": [
+      {
+        "id": "ex-3-1",
+        "order": 1,
+        "targetSentence": "Do you swim",
+        "blocks": [
+          { "id": "block-3-1-1", "label": "Do", "category": "verb", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-3-1-2", "label": "you", "category": "subject", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-3-1-3", "label": "swim", "category": "verb", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-3-1-4", "label": "run", "category": "verb", "isDistractor": true, "sourceOrder": 4 }
+        ]
+      },
+      {
+        "id": "ex-3-2",
+        "order": 2,
+        "targetSentence": "Does she like music",
+        "blocks": [
+          { "id": "block-3-2-1", "label": "Does", "category": "verb", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-3-2-2", "label": "she", "category": "subject", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-3-2-3", "label": "like", "category": "verb", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-3-2-4", "label": "music", "category": "object", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-3-2-5", "label": "he", "category": "subject", "isDistractor": true, "sourceOrder": 5 },
+          { "id": "block-3-2-6", "label": "food", "category": "object", "isDistractor": true, "sourceOrder": 6 }
+        ]
+      },
+      {
+        "id": "ex-3-3",
+        "order": 3,
+        "targetSentence": "Did they go home",
+        "blocks": [
+          { "id": "block-3-3-1", "label": "Did", "category": "verb", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-3-3-2", "label": "they", "category": "subject", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-3-3-3", "label": "go", "category": "verb", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-3-3-4", "label": "home", "category": "place", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-3-3-5", "label": "come", "category": "verb", "isDistractor": true, "sourceOrder": 5 },
+          { "id": "block-3-3-6", "label": "we", "category": "subject", "isDistractor": true, "sourceOrder": 6 }
+        ]
+      },
+      {
+        "id": "ex-3-4",
+        "order": 4,
+        "targetSentence": "Where does your brother live",
+        "blocks": [
+          { "id": "block-3-4-1", "label": "Where", "category": "modifier", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-3-4-2", "label": "does", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-3-4-3", "label": "your", "category": "subject", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-3-4-4", "label": "brother", "category": "subject", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-3-4-5", "label": "live", "category": "verb", "isDistractor": false, "sourceOrder": 5 },
+          { "id": "block-3-4-6", "label": "sister", "category": "subject", "isDistractor": true, "sourceOrder": 6 },
+          { "id": "block-3-4-7", "label": "work", "category": "verb", "isDistractor": true, "sourceOrder": 7 }
+        ]
+      },
+      {
+        "id": "ex-3-5",
+        "order": 5,
+        "targetSentence": "What did you eat for breakfast",
+        "blocks": [
+          { "id": "block-3-5-1", "label": "What", "category": "modifier", "isDistractor": false, "sourceOrder": 1 },
+          { "id": "block-3-5-2", "label": "did", "category": "verb", "isDistractor": false, "sourceOrder": 2 },
+          { "id": "block-3-5-3", "label": "you", "category": "subject", "isDistractor": false, "sourceOrder": 3 },
+          { "id": "block-3-5-4", "label": "eat", "category": "verb", "isDistractor": false, "sourceOrder": 4 },
+          { "id": "block-3-5-5", "label": "for", "category": "modifier", "isDistractor": false, "sourceOrder": 5 },
+          { "id": "block-3-5-6", "label": "breakfast", "category": "object", "isDistractor": false, "sourceOrder": 6 },
+          { "id": "block-3-5-7", "label": "lunch", "category": "object", "isDistractor": true, "sourceOrder": 7 },
+          { "id": "block-3-5-8", "label": "drink", "category": "verb", "isDistractor": true, "sourceOrder": 8 },
+          { "id": "block-3-5-9", "label": "they", "category": "subject", "isDistractor": true, "sourceOrder": 9 }
+        ]
+      }
+    ]
+  }
+]

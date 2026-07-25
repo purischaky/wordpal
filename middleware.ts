@@ -2,11 +2,19 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // If Supabase is not configured, skip auth checks entirely (allows demo to work)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey || supabaseUrl === 'your-supabase-url') {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
@@ -25,20 +33,25 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
 
-  // Define protected routes
-  const isProtectedRoute =
-    request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/lessons') ||
-    request.nextUrl.pathname.startsWith('/progress') ||
-    request.nextUrl.pathname.startsWith('/leaderboard')
+    // Define protected routes
+    const isProtectedRoute =
+      request.nextUrl.pathname.startsWith('/dashboard') ||
+      request.nextUrl.pathname.startsWith('/lessons') ||
+      request.nextUrl.pathname.startsWith('/progress') ||
+      request.nextUrl.pathname.startsWith('/leaderboard')
 
-  if (!user && isProtectedRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/auth/signin'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
-    return NextResponse.redirect(url)
+    if (!user && isProtectedRoute) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/signin'
+      url.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(url)
+    }
+  } catch {
+    // If Supabase call fails, allow the request through
+    return NextResponse.next()
   }
 
   return supabaseResponse

@@ -31,7 +31,7 @@ export default function Home() {
             Build English, Block by Block
           </p>
           <Link
-            href="/dashboard"
+            href="/demo"
             className="inline-flex items-center gap-2 bg-wp-primary hover:bg-wp-primary-hover text-white font-semibold text-lg px-8 py-4 rounded-lg transition-colors shadow-lg hover:shadow-xl"
           >
             ▶ Start Learning

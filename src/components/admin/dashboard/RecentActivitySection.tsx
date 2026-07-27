@@ -8,151 +8,42 @@ import type { TimelineEvent } from '../design-system/Timeline';
 
 // ─── Mock Activity Data ──────────────────────────────────────────────────────
 
-function generateMockEvents(): TimelineEvent[] {
-  const now = new Date();
+/** Time offsets in ms for each mock event (relative to a fixed reference) */
+const EVENT_OFFSETS: { id: string; offset: number; type: TimelineEvent['type']; title: string; description: string }[] = [
+  { id: 'evt-1', offset: 5 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Maria García joined the platform' },
+  { id: 'evt-2', offset: 22 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Carlos Méndez finished "Present Perfect Tense"' },
+  { id: 'evt-3', offset: 1.5 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Ana Torres scored 85% on B1 challenge' },
+  { id: 'evt-4', offset: 3 * 60 * 60 * 1000, type: 'achievement_unlock', title: 'Achievement unlocked', description: 'Pedro López earned "7-Day Streak" badge' },
+  { id: 'evt-5', offset: 5 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Sofía Ruiz finished "Conditional Sentences"' },
+  { id: 'evt-6', offset: 8 * 60 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Luis Fernández joined the platform' },
+  { id: 'evt-7', offset: 12 * 60 * 60 * 1000, type: 'level_change', title: 'Level advancement', description: 'Elena Morales advanced from A2 to B1' },
+  { id: 'evt-8', offset: 1 * 24 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Javier Díaz scored 72% on A2 challenge' },
+  { id: 'evt-9', offset: 1.5 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Claudia Herrera finished "Relative Clauses"' },
+  { id: 'evt-10', offset: 2 * 24 * 60 * 60 * 1000, type: 'achievement_unlock', title: 'Achievement unlocked', description: 'Martín Rivera earned "Grammar Master" badge' },
+  { id: 'evt-11', offset: 2.5 * 24 * 60 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Isabella Navarro joined the platform' },
+  { id: 'evt-12', offset: 3 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Andrés Vargas finished "Passive Voice"' },
+  { id: 'evt-13', offset: 4 * 24 * 60 * 60 * 1000, type: 'level_change', title: 'Level advancement', description: 'Paula Ramos advanced from B1 to B2' },
+  { id: 'evt-14', offset: 5 * 24 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Daniel Castro scored 91% on C1 challenge' },
+  { id: 'evt-15', offset: 5.5 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Valentina Ortiz finished "Reported Speech"' },
+  { id: 'evt-16', offset: 6 * 24 * 60 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Ricardo Peña joined the platform' },
+  { id: 'evt-17', offset: 8 * 24 * 60 * 60 * 1000, type: 'achievement_unlock', title: 'Achievement unlocked', description: 'Carmen Jiménez earned "50 Exercises" badge' },
+  { id: 'evt-18', offset: 10 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Miguel Sánchez finished "Modal Verbs"' },
+  { id: 'evt-19', offset: 12 * 24 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Laura Gutiérrez scored 68% on B2 challenge' },
+  { id: 'evt-20', offset: 14 * 24 * 60 * 60 * 1000, type: 'level_change', title: 'Level advancement', description: 'Fernando Reyes advanced from A1 to A2' },
+];
 
-  return [
-    {
-      id: 'evt-1',
-      date: new Date(now.getTime() - 5 * 60 * 1000).toISOString(),
-      type: 'registration',
-      title: 'New student registered',
-      description: 'Maria García joined the platform',
-    },
-    {
-      id: 'evt-2',
-      date: new Date(now.getTime() - 22 * 60 * 1000).toISOString(),
-      type: 'lesson_completed',
-      title: 'Lesson completed',
-      description: 'Carlos Méndez finished "Present Perfect Tense"',
-    },
-    {
-      id: 'evt-3',
-      date: new Date(now.getTime() - 1.5 * 60 * 60 * 1000).toISOString(),
-      type: 'challenge_attempt',
-      title: 'Placement challenge attempted',
-      description: 'Ana Torres scored 85% on B1 challenge',
-    },
-    {
-      id: 'evt-4',
-      date: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(),
-      type: 'achievement_unlock',
-      title: 'Achievement unlocked',
-      description: 'Pedro López earned "7-Day Streak" badge',
-    },
-    {
-      id: 'evt-5',
-      date: new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString(),
-      type: 'lesson_completed',
-      title: 'Lesson completed',
-      description: 'Sofía Ruiz finished "Conditional Sentences"',
-    },
-    {
-      id: 'evt-6',
-      date: new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString(),
-      type: 'registration',
-      title: 'New student registered',
-      description: 'Luis Fernández joined the platform',
-    },
-    {
-      id: 'evt-7',
-      date: new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString(),
-      type: 'level_change',
-      title: 'Level advancement',
-      description: 'Elena Morales advanced from A2 to B1',
-    },
-    {
-      id: 'evt-8',
-      date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'challenge_attempt',
-      title: 'Placement challenge attempted',
-      description: 'Javier Díaz scored 72% on A2 challenge',
-    },
-    {
-      id: 'evt-9',
-      date: new Date(now.getTime() - 1.5 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'lesson_completed',
-      title: 'Lesson completed',
-      description: 'Claudia Herrera finished "Relative Clauses"',
-    },
-    {
-      id: 'evt-10',
-      date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'achievement_unlock',
-      title: 'Achievement unlocked',
-      description: 'Martín Rivera earned "Grammar Master" badge',
-    },
-    {
-      id: 'evt-11',
-      date: new Date(now.getTime() - 2.5 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'registration',
-      title: 'New student registered',
-      description: 'Isabella Navarro joined the platform',
-    },
-    {
-      id: 'evt-12',
-      date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'lesson_completed',
-      title: 'Lesson completed',
-      description: 'Andrés Vargas finished "Passive Voice"',
-    },
-    {
-      id: 'evt-13',
-      date: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'level_change',
-      title: 'Level advancement',
-      description: 'Paula Ramos advanced from B1 to B2',
-    },
-    {
-      id: 'evt-14',
-      date: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'challenge_attempt',
-      title: 'Placement challenge attempted',
-      description: 'Daniel Castro scored 91% on C1 challenge',
-    },
-    {
-      id: 'evt-15',
-      date: new Date(now.getTime() - 5.5 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'lesson_completed',
-      title: 'Lesson completed',
-      description: 'Valentina Ortiz finished "Reported Speech"',
-    },
-    {
-      id: 'evt-16',
-      date: new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'registration',
-      title: 'New student registered',
-      description: 'Ricardo Peña joined the platform',
-    },
-    {
-      id: 'evt-17',
-      date: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'achievement_unlock',
-      title: 'Achievement unlocked',
-      description: 'Carmen Jiménez earned "50 Exercises" badge',
-    },
-    {
-      id: 'evt-18',
-      date: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'lesson_completed',
-      title: 'Lesson completed',
-      description: 'Miguel Sánchez finished "Modal Verbs"',
-    },
-    {
-      id: 'evt-19',
-      date: new Date(now.getTime() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'challenge_attempt',
-      title: 'Placement challenge attempted',
-      description: 'Laura Gutiérrez scored 68% on B2 challenge',
-    },
-    {
-      id: 'evt-20',
-      date: new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'level_change',
-      title: 'Level advancement',
-      description: 'Fernando Reyes advanced from A1 to A2',
-    },
-  ];
+/**
+ * Generates mock events with a fixed reference time to avoid hydration mismatches.
+ * The reference time is captured once and reused for both server and client renders.
+ */
+function generateMockEvents(referenceTime: number): TimelineEvent[] {
+  return EVENT_OFFSETS.map((item) => ({
+    id: item.id,
+    date: new Date(referenceTime - item.offset).toISOString(),
+    type: item.type,
+    title: item.title,
+    description: item.description,
+  }));
 }
 
 // ─── Quick Actions ───────────────────────────────────────────────────────────
@@ -227,7 +118,11 @@ export interface RecentActivitySectionProps {
  * @validates Requirements 3.3, 3.4, 3.7
  */
 export function RecentActivitySection({ events }: RecentActivitySectionProps) {
-  const activityEvents = events ?? generateMockEvents();
+  // Use a fixed reference time (start of today UTC) to avoid hydration mismatches.
+  // Since this is mock data, the exact time doesn't matter — what matters is
+  // that server and client compute the same dates.
+  const referenceTime = new Date().setUTCHours(12, 0, 0, 0);
+  const activityEvents = events ?? generateMockEvents(referenceTime);
   // Limit to 20 events max
   const displayEvents = activityEvents.slice(0, 20);
 

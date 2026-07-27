@@ -1,0 +1,67 @@
+[
+  {
+    "id": "ch-1",
+    "title": "Beginner Grammar Placement",
+    "targetLevel": "A1",
+    "grammarTopics": ["Present Tense", "Articles", "Subject Pronouns"],
+    "difficulty": 1,
+    "exerciseTypes": ["multiple-choice", "fill-in-blank"],
+    "questionCount": 15,
+    "status": "published",
+    "questions": [],
+    "createdAt": "2024-10-01T09:00:00Z",
+    "updatedAt": "2024-11-15T14:00:00Z"
+  },
+  {
+    "id": "ch-2",
+    "title": "Elementary Level Assessment",
+    "targetLevel": "A2",
+    "grammarTopics": ["Past Tense", "Comparatives", "Prepositions", "Present Continuous"],
+    "difficulty": 2,
+    "exerciseTypes": ["multiple-choice", "sentence-ordering", "fill-in-blank"],
+    "questionCount": 20,
+    "status": "published",
+    "questions": [],
+    "createdAt": "2024-10-10T11:30:00Z",
+    "updatedAt": "2024-11-20T16:45:00Z"
+  },
+  {
+    "id": "ch-3",
+    "title": "Intermediate Grammar Challenge",
+    "targetLevel": "B1",
+    "grammarTopics": ["Conditionals", "Reported Speech", "Passive Voice", "Modal Verbs"],
+    "difficulty": 3,
+    "exerciseTypes": ["multiple-choice", "rewrite-sentence", "fill-in-blank", "sentence-ordering"],
+    "questionCount": 25,
+    "status": "published",
+    "questions": [],
+    "createdAt": "2024-10-20T14:00:00Z",
+    "updatedAt": "2024-12-01T10:00:00Z"
+  },
+  {
+    "id": "ch-4",
+    "title": "Upper-Intermediate Proficiency Test",
+    "targetLevel": "B2",
+    "grammarTopics": ["Perfect Tenses", "Relative Clauses", "Subjunctive", "Inversion"],
+    "difficulty": 4,
+    "exerciseTypes": ["multiple-choice", "rewrite-sentence", "free-writing", "fill-in-blank"],
+    "questionCount": 30,
+    "status": "draft",
+    "questions": [],
+    "createdAt": "2024-11-05T08:15:00Z",
+    "updatedAt": "2024-12-02T09:30:00Z"
+  },
+  {
+    "id": "ch-5",
+    "title": "Advanced Academic Placement",
+    "targetLevel": "C1",
+    "grammarTopics": ["Mixed Conditionals", "Cleft Sentences", "Nominalization", "Discourse Markers", "Advanced Modals"],
+    "difficulty": 5,
+    "exerciseTypes": ["multiple-choice", "rewrite-sentence", "free-writing", "sentence-ordering", "fill-in-blank"],
+    "questionCount": 40,
+    "status": "draft",
+    "questions": [],
+    "createdAt": "2024-11-20T16:00:00Z",
+    "updatedAt": "2024-12-03T11:00:00Z"
+  }
+]

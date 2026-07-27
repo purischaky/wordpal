@@ -1,0 +1,12 @@
+[
+  { "id": "total-students", "title": "Total Students", "value": 1247, "changePercentage": 12.3, "trendDirection": "up", "period": "all time" },
+  { "id": "active-students-7d", "title": "Active Students (7d)", "value": 834, "changePercentage": 5.7, "trendDirection": "up", "period": "last 7 days" },
+  { "id": "lessons-completed-30d", "title": "Lessons Completed (30d)", "value": 3892, "changePercentage": 8.2, "trendDirection": "up", "period": "last 30 days" },
+  { "id": "avg-grammar-score", "title": "Average Grammar Score", "value": 72.4, "changePercentage": 3.1, "trendDirection": "up", "period": "last 30 days" },
+  { "id": "cefr-distribution", "title": "CEFR Distribution", "value": "B1 (38%)", "changePercentage": 2.4, "trendDirection": "up", "period": "current" },
+  { "id": "placement-success-rate", "title": "Placement Challenge Success", "value": "68.5%", "changePercentage": 4.2, "trendDirection": "up", "period": "last 30 days" },
+  { "id": "avg-session-time", "title": "Average Session Time", "value": "24 min", "changePercentage": 1.8, "trendDirection": "down", "period": "last 7 days" },
+  { "id": "daily-active-users", "title": "Daily Active Users", "value": 312, "changePercentage": 6.9, "trendDirection": "up", "period": "today" },
+  { "id": "weekly-learning-progress", "title": "Weekly Learning Progress", "value": "84.2%", "changePercentage": 2.5, "trendDirection": "up", "period": "this week" },
+  { "id": "common-grammar-mistakes", "title": "Most Common Grammar Mistakes", "value": "Subject-Verb", "changePercentage": 3.6, "trendDirection": "down", "period": "last 30 days" }
+]

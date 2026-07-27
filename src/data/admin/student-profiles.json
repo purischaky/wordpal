@@ -1,0 +1,175 @@
+{
+  "1": {
+    "id": "1",
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "role": "student",
+    "joinDate": "2024-06-15T10:00:00Z",
+    "avatarUrl": null,
+    "status": "active",
+    "currentLearningPath": "Intermediate Grammar Mastery",
+    "currentLesson": "Present Perfect Tense",
+    "grammarScores": [
+      { "category": "subject", "score": 85 },
+      { "category": "verb", "score": 72 },
+      { "category": "object", "score": 68 },
+      { "category": "time", "score": 55 },
+      { "category": "place", "score": 60 },
+      { "category": "connector", "score": 78 },
+      { "category": "modifier", "score": 45 }
+    ],
+    "achievements": [
+      { "id": "a1", "badgeIcon": "🏆", "title": "First Lesson Complete", "date": "2024-11-28T10:00:00Z" },
+      { "id": "a2", "badgeIcon": "🔥", "title": "7-Day Streak", "date": "2024-11-25T09:00:00Z" },
+      { "id": "a3", "badgeIcon": "⭐", "title": "Grammar Score 80+", "date": "2024-11-20T14:00:00Z" },
+      { "id": "a4", "badgeIcon": "📚", "title": "10 Lessons Completed", "date": "2024-11-15T16:00:00Z" },
+      { "id": "a5", "badgeIcon": "🎯", "title": "Challenge Passed", "date": "2024-11-10T11:00:00Z" },
+      { "id": "a6", "badgeIcon": "💪", "title": "50 Exercises Done", "date": "2024-11-05T08:30:00Z" },
+      { "id": "a7", "badgeIcon": "🌟", "title": "Perfect Score", "date": "2024-10-30T13:00:00Z" },
+      { "id": "a8", "badgeIcon": "📝", "title": "First Writing Exercise", "date": "2024-10-25T10:00:00Z" }
+    ],
+    "placementResults": [
+      { "id": "p1", "date": "2024-12-01T10:00:00Z", "score": 82, "result": "pass", "targetLevel": "B2" },
+      { "id": "p2", "date": "2024-11-15T14:00:00Z", "score": 65, "result": "fail", "targetLevel": "B2" },
+      { "id": "p3", "date": "2024-10-20T09:00:00Z", "score": 78, "result": "pass", "targetLevel": "B1" },
+      { "id": "p4", "date": "2024-09-10T11:00:00Z", "score": 58, "result": "fail", "targetLevel": "B1" },
+      { "id": "p5", "date": "2024-08-01T16:00:00Z", "score": 71, "result": "pass", "targetLevel": "A2" }
+    ],
+    "aiCoach": {
+      "weakAreas": [
+        "Conditional clauses (Type 2 & 3)",
+        "Passive voice transformations",
+        "Time markers with perfect tenses",
+        "Relative clause punctuation",
+        "Modifier placement in complex sentences"
+      ],
+      "recommendedLessons": [
+        "Advanced Conditionals",
+        "Passive Voice Mastery",
+        "Perfect Tense Deep Dive"
+      ],
+      "assessment": "Alice shows strong foundational grammar but struggles with complex sentence structures. Focus on conditional forms and passive constructions to reach B2 proficiency."
+    },
+    "timelineEvents": [
+      { "id": "t1", "date": "2024-12-02T10:00:00Z", "type": "lesson_completed", "title": "Completed \"Present Perfect Tense\"", "description": "Score: 85%" },
+      { "id": "t2", "date": "2024-12-01T15:00:00Z", "type": "challenge_attempt", "title": "Attempted B2 Placement Challenge", "description": "Score: 82/100 — Passed" },
+      { "id": "t3", "date": "2024-11-30T09:00:00Z", "type": "achievement_unlock", "title": "Unlocked \"7-Day Streak\"", "description": "Maintained daily practice" },
+      { "id": "t4", "date": "2024-11-29T14:00:00Z", "type": "lesson_completed", "title": "Completed \"Reported Speech\"", "description": "Score: 78%" },
+      { "id": "t5", "date": "2024-11-28T10:00:00Z", "type": "lesson_completed", "title": "Completed \"Modal Verbs\"", "description": "Score: 72%" },
+      { "id": "t6", "date": "2024-11-27T11:30:00Z", "type": "achievement_unlock", "title": "Unlocked \"First Lesson Complete\"" },
+      { "id": "t7", "date": "2024-11-26T16:00:00Z", "type": "lesson_completed", "title": "Completed \"Simple Past Review\"", "description": "Score: 90%" },
+      { "id": "t8", "date": "2024-11-25T08:00:00Z", "type": "registration", "title": "Started Learning Path: Intermediate Grammar" },
+      { "id": "t9", "date": "2024-11-24T13:00:00Z", "type": "challenge_attempt", "title": "Attempted B1 Placement Challenge", "description": "Score: 78/100 — Passed" },
+      { "id": "t10", "date": "2024-11-23T10:00:00Z", "type": "level_change", "title": "CEFR Level updated to B1" },
+      { "id": "t11", "date": "2024-11-22T14:30:00Z", "type": "lesson_completed", "title": "Completed \"Articles\"", "description": "Score: 88%" },
+      { "id": "t12", "date": "2024-11-21T09:00:00Z", "type": "lesson_completed", "title": "Completed \"Prepositions of Time\"", "description": "Score: 75%" }
+    ],
+    "certificates": [
+      { "id": "c1", "title": "B1 Grammar Proficiency", "type": "CEFR Level", "issueDate": "2024-11-23T10:00:00Z" },
+      { "id": "c2", "title": "Intermediate Course Completion", "type": "Course", "issueDate": "2024-10-15T14:00:00Z" }
+    ]
+  },
+  "2": {
+    "id": "2",
+    "name": "Bob Martinez",
+    "email": "bob@example.com",
+    "role": "student",
+    "joinDate": "2024-07-20T09:00:00Z",
+    "avatarUrl": null,
+    "status": "active",
+    "currentLearningPath": "Elementary Grammar Essentials",
+    "currentLesson": "Simple Past",
+    "grammarScores": [
+      { "category": "subject", "score": 70 },
+      { "category": "verb", "score": 58 },
+      { "category": "object", "score": 62 },
+      { "category": "time", "score": 50 },
+      { "category": "place", "score": 55 },
+      { "category": "connector", "score": 40 },
+      { "category": "modifier", "score": 35 }
+    ],
+    "achievements": [
+      { "id": "a1", "badgeIcon": "🏆", "title": "First Lesson Complete", "date": "2024-10-01T10:00:00Z" },
+      { "id": "a2", "badgeIcon": "🔥", "title": "7-Day Streak", "date": "2024-10-15T09:00:00Z" }
+    ],
+    "placementResults": [
+      { "id": "p1", "date": "2024-11-01T10:00:00Z", "score": 55, "result": "fail", "targetLevel": "B1" },
+      { "id": "p2", "date": "2024-09-15T14:00:00Z", "score": 72, "result": "pass", "targetLevel": "A2" }
+    ],
+    "aiCoach": {
+      "weakAreas": [
+        "Past tense irregular verbs",
+        "Connector usage in compound sentences",
+        "Modifier placement"
+      ],
+      "recommendedLessons": [
+        "Irregular Verbs Practice",
+        "Sentence Connectors",
+        "Adverb Placement"
+      ],
+      "assessment": "Bob has a solid grasp of basic sentence structure but needs work on irregular verb forms and connecting ideas smoothly."
+    },
+    "timelineEvents": [
+      { "id": "t1", "date": "2024-11-28T14:30:00Z", "type": "lesson_completed", "title": "Completed \"Simple Past Review\"", "description": "Score: 68%" },
+      { "id": "t2", "date": "2024-11-25T10:00:00Z", "type": "lesson_completed", "title": "Completed \"Regular Verbs\"", "description": "Score: 72%" },
+      { "id": "t3", "date": "2024-11-20T09:00:00Z", "type": "challenge_attempt", "title": "Attempted B1 Placement Challenge", "description": "Score: 55/100 — Failed" }
+    ],
+    "certificates": [
+      { "id": "c1", "title": "A2 Grammar Basics", "type": "CEFR Level", "issueDate": "2024-09-15T14:00:00Z" }
+    ]
+  },
+  "3": {
+    "id": "3",
+    "name": "Clara Schmidt",
+    "email": "clara@example.com",
+    "role": "student",
+    "joinDate": "2024-03-10T08:00:00Z",
+    "avatarUrl": null,
+    "status": "active",
+    "currentLearningPath": "Advanced Academic English",
+    "currentLesson": "Subjunctive Mood",
+    "grammarScores": [
+      { "category": "subject", "score": 92 },
+      { "category": "verb", "score": 88 },
+      { "category": "object", "score": 85 },
+      { "category": "time", "score": 90 },
+      { "category": "place", "score": 87 },
+      { "category": "connector", "score": 94 },
+      { "category": "modifier", "score": 80 }
+    ],
+    "achievements": [
+      { "id": "a1", "badgeIcon": "🏆", "title": "First Lesson Complete", "date": "2024-03-15T10:00:00Z" },
+      { "id": "a2", "badgeIcon": "🔥", "title": "30-Day Streak", "date": "2024-05-10T09:00:00Z" },
+      { "id": "a3", "badgeIcon": "⭐", "title": "Grammar Score 90+", "date": "2024-09-20T14:00:00Z" },
+      { "id": "a4", "badgeIcon": "📚", "title": "50 Lessons Completed", "date": "2024-11-01T16:00:00Z" },
+      { "id": "a5", "badgeIcon": "🎯", "title": "Challenge Passed", "date": "2024-11-15T11:00:00Z" }
+    ],
+    "placementResults": [
+      { "id": "p1", "date": "2024-12-02T09:15:00Z", "score": 91, "result": "pass", "targetLevel": "C1" },
+      { "id": "p2", "date": "2024-09-01T10:00:00Z", "score": 85, "result": "pass", "targetLevel": "B2" },
+      { "id": "p3", "date": "2024-05-20T14:00:00Z", "score": 78, "result": "pass", "targetLevel": "B1" }
+    ],
+    "aiCoach": {
+      "weakAreas": [
+        "Subjunctive mood in formal writing",
+        "Modifier placement in academic prose"
+      ],
+      "recommendedLessons": [
+        "Subjunctive Deep Dive",
+        "Academic Writing Style"
+      ],
+      "assessment": "Clara is an advanced learner excelling across all grammar categories. She's ready for C1 certification with minor refinements in formal writing conventions."
+    },
+    "timelineEvents": [
+      { "id": "t1", "date": "2024-12-02T09:15:00Z", "type": "challenge_attempt", "title": "Attempted C1 Placement Challenge", "description": "Score: 91/100 — Passed" },
+      { "id": "t2", "date": "2024-12-01T10:00:00Z", "type": "lesson_completed", "title": "Completed \"Inversion Patterns\"", "description": "Score: 92%" },
+      { "id": "t3", "date": "2024-11-30T14:00:00Z", "type": "achievement_unlock", "title": "Unlocked \"Grammar Score 90+\"" },
+      { "id": "t4", "date": "2024-11-28T09:00:00Z", "type": "lesson_completed", "title": "Completed \"Cleft Sentences\"", "description": "Score: 88%" }
+    ],
+    "certificates": [
+      { "id": "c1", "title": "C1 Grammar Proficiency", "type": "CEFR Level", "issueDate": "2024-12-02T09:15:00Z" },
+      { "id": "c2", "title": "B2 Grammar Proficiency", "type": "CEFR Level", "issueDate": "2024-09-01T10:00:00Z" },
+      { "id": "c3", "title": "Advanced Course Completion", "type": "Course", "issueDate": "2024-11-01T16:00:00Z" }
+    ]
+  }
+}

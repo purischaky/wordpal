@@ -1,0 +1,57 @@
+[
+  {
+    "id": "insight-1",
+    "title": "High failure rate on Past Perfect tense exercises",
+    "description": "Over 60% of B1 students scored below 60% on Past Perfect exercises in the last 7 days. Consider creating additional practice content targeting this grammar area.",
+    "affectedStudentCount": 78,
+    "priority": "high",
+    "suggestedAction": "Generate AI exercises for Past Perfect at B1 level",
+    "actionType": "content_gap",
+    "actionParams": { "grammarTopic": "Past Perfect", "targetLevel": "B1" },
+    "generatedAt": "2024-12-02T08:00:00Z"
+  },
+  {
+    "id": "insight-2",
+    "title": "Students struggling with Conditional Type III",
+    "description": "A significant group of B2 students are consistently failing Conditional III exercises. Targeted content and practice sessions are recommended.",
+    "affectedStudentCount": 54,
+    "priority": "high",
+    "suggestedAction": "Create supplementary Conditional III lessons for B2",
+    "actionType": "content_gap",
+    "actionParams": { "grammarTopic": "Conditional Type III", "targetLevel": "B2" },
+    "generatedAt": "2024-12-02T08:00:00Z"
+  },
+  {
+    "id": "insight-3",
+    "title": "A2 students dropping engagement after Unit 3",
+    "description": "Engagement metrics show 35 A2 students have not completed any lessons in the past week after reaching Unit 3. Consider reviewing lesson difficulty progression.",
+    "affectedStudentCount": 35,
+    "priority": "medium",
+    "suggestedAction": "View affected A2 students and check progress",
+    "actionType": "student_performance",
+    "actionParams": { "cefrLevel": "A2", "status": "inactive" },
+    "generatedAt": "2024-12-02T08:00:00Z"
+  },
+  {
+    "id": "insight-4",
+    "title": "Article usage errors in A1 writing exercises",
+    "description": "A1 students are making frequent article misuse errors in free writing exercises. Additional guided examples may help address this common beginner pattern.",
+    "affectedStudentCount": 22,
+    "priority": "medium",
+    "suggestedAction": "Generate focused article usage content for A1",
+    "actionType": "content_gap",
+    "actionParams": { "grammarTopic": "Articles", "targetLevel": "A1" },
+    "generatedAt": "2024-12-02T08:00:00Z"
+  },
+  {
+    "id": "insight-5",
+    "title": "Low completion on C1 Inversion exercises",
+    "description": "A small group of advanced students are abandoning Inversion exercises. The exercises may need clearer instructions or scaffolding.",
+    "affectedStudentCount": 8,
+    "priority": "low",
+    "suggestedAction": "Review C1 students struggling with Inversion",
+    "actionType": "student_performance",
+    "actionParams": { "cefrLevel": "C1", "grammarTopic": "Inversion" },
+    "generatedAt": "2024-12-02T08:00:00Z"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "scoring": {
+    "xpPerExercise": 10,
+    "xpPerLesson": 50,
+    "weightByExerciseType": {
+      "multiple-choice": 20,
+      "fill-in-blank": 20,
+      "drag-and-drop": 20,
+      "sentence-ordering": 20,
+      "rewrite-sentence": 10,
+      "free-writing": 10
+    },
+    "passingThreshold": 70
+  }
+}

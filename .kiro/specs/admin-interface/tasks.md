@@ -6,8 +6,8 @@ Implement a role-gated admin content management system within the existing Next.
 
 ## Tasks
 
-- [ ] 1. Set up database schema and TypeScript types
-  - [ ] 1.1 Create database migration for admin content tables
+- [x] 1. Set up database schema and TypeScript types
+  - [x] 1.1 Create database migration for admin content tables
     - Add `role` column to users table with check constraint (`learner`, `admin`)
     - Extend `lessons` table with `level`, `icon`, `updated_at` columns
     - Extend `exercises` table with `hint`, `tutor_explanation`, `updated_at` columns
@@ -16,110 +16,110 @@ Implement a role-gated admin content management system within the existing Next.
     - Create RLS policies for admin-only writes and public reads
     - _Requirements: 1.1, 1.4, 2.3, 3.3, 4.3, 5.3_
 
-  - [ ] 1.2 Define TypeScript types and interfaces for admin entities
+  - [x] 1.2 Define TypeScript types and interfaces for admin entities
     - Create `src/types/admin.ts` with `Level`, `BlockCategory`, input types, and view types
     - Define `CreateLessonInput`, `UpdateLessonInput`, `CreateExerciseInput`, `UpdateExerciseInput`, `CreateBlockInput`, `UpdateBlockInput`, `UpdateChallengeInput`
     - Define view types: `LessonWithCount`, `ExerciseWithBlockCount`, `ChallengeWithCount`
     - _Requirements: 2.2, 3.2, 4.2, 5.2_
 
-- [ ] 2. Implement content validation utilities
-  - [ ] 2.1 Implement field validation functions
+- [x] 2. Implement content validation utilities
+  - [x] 2.1 Implement field validation functions
     - Create `src/lib/validation/field-validators.ts`
     - Implement validators for title (non-empty, max 100), description (max 300), target sentence (non-empty, max 200), block label (non-empty/non-whitespace, max 50), hint (max 300), tutor explanation (max 500)
     - Return structured validation results with error messages
     - _Requirements: 2.9, 3.8, 3.9, 4.6, 5.7_
 
-  - [ ]* 2.2 Write property test for field validation (Property 4)
+  - [ ] 2.2 Write property test for field validation (Property 4)
     - **Property 4: Text field validation rejects invalid input**
     - **Validates: Requirements 2.9, 3.8, 3.9, 4.6**
 
-  - [ ] 2.3 Implement content validator for exercise blocks
+  - [x] 2.3 Implement content validator for exercise blocks
     - Create `src/lib/validation/content-validator.ts`
     - Implement `validateExerciseBlocks` function checking block-to-sentence consistency, block count range [2, 15], and non-distractor minimum
     - Return `ValidationResult` with `valid`, `errors`, and `warnings` arrays
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 4.7_
 
-  - [ ]* 2.4 Write property test for block-to-sentence consistency (Property 5)
+  - [ ] 2.4 Write property test for block-to-sentence consistency (Property 5)
     - **Property 5: Block-to-sentence consistency detection**
     - **Validates: Requirements 6.1, 6.2**
 
-  - [ ]* 2.5 Write property test for block count range (Property 6)
+  - [ ] 2.5 Write property test for block count range (Property 6)
     - **Property 6: Block count range validation**
     - **Validates: Requirements 6.3, 6.4**
 
-  - [ ]* 2.6 Write property test for non-distractor minimum (Property 7)
+  - [ ] 2.6 Write property test for non-distractor minimum (Property 7)
     - **Property 7: Non-distractor minimum enforcement**
     - **Validates: Requirements 4.7**
 
-  - [ ] 2.7 Implement level ordering and required correct count validators
+  - [x] 2.7 Implement level ordering and required correct count validators
     - Add `validateLevelOrdering` function (from-level must be strictly lower than to-level)
     - Add `validateRequiredCorrect` function (requiredCorrect must be between 1 and total exercises)
     - _Requirements: 5.4, 5.6_
 
-  - [ ]* 2.8 Write property test for level ordering constraint (Property 8)
+  - [ ] 2.8 Write property test for level ordering constraint (Property 8)
     - **Property 8: Level ordering constraint**
     - **Validates: Requirements 5.6**
 
-  - [ ]* 2.9 Write property test for required correct count bound (Property 9)
+  - [ ] 2.9 Write property test for required correct count bound (Property 9)
     - **Property 9: Required correct count bound**
     - **Validates: Requirements 5.4**
 
-- [ ] 3. Checkpoint - Ensure all validation tests pass
+- [x] 3. Checkpoint - Ensure all validation tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Implement reorder and deletion utilities
-  - [ ] 4.1 Implement reorder logic utility
+- [x] 4. Implement reorder and deletion utilities
+  - [x] 4.1 Implement reorder logic utility
     - Create `src/lib/utils/reorder.ts`
     - Implement `reorderItems` function that takes a list and a move operation (from index, to index) and returns items with contiguous order values starting from 1
     - Implement `resequenceAfterDeletion` function that reassigns contiguous order values after an item is removed
     - _Requirements: 2.6, 3.5, 4.4, 5.5_
 
-  - [ ]* 4.2 Write property test for reorder contiguous sequence (Property 1)
+  - [ ] 4.2 Write property test for reorder contiguous sequence (Property 1)
     - **Property 1: Reorder produces contiguous sequence**
     - **Validates: Requirements 2.6, 3.5, 4.4, 5.5**
 
-  - [ ]* 4.3 Write property test for deletion re-sequencing (Property 10)
+  - [ ] 4.3 Write property test for deletion re-sequencing (Property 10)
     - **Property 10: Deletion re-sequencing**
     - **Validates: Requirements 4.5**
 
-- [ ] 5. Implement content manager service layer
-  - [ ] 5.1 Implement lesson CRUD operations in content manager
+- [x] 5. Implement content manager service layer
+  - [x] 5.1 Implement lesson CRUD operations in content manager
     - Create `src/lib/services/content-manager.ts`
     - Implement `getLessons`, `getLessonById`, `createLesson`, `updateLesson`, `deleteLesson`, `reorderLessons`
     - Use `createSupabaseServerClient` for database access
     - Cascade deletion for lessons removes associated exercises and blocks
     - _Requirements: 2.1, 2.3, 2.4, 2.5, 2.6, 2.8_
 
-  - [ ] 5.2 Implement exercise CRUD operations in content manager
+  - [x] 5.2 Implement exercise CRUD operations in content manager
     - Implement `getExercisesByLesson`, `getExerciseById`, `createExercise`, `updateExercise`, `deleteExercise`, `reorderExercises`
     - Cascade deletion for exercises removes associated grammar blocks
     - Run content validation on save and include warnings in response
     - _Requirements: 3.1, 3.3, 3.4, 3.5, 3.7, 6.1, 6.3_
 
-  - [ ] 5.3 Implement grammar block CRUD operations in content manager
+  - [x] 5.3 Implement grammar block CRUD operations in content manager
     - Implement `getBlocksByExercise`, `createBlock`, `updateBlock`, `deleteBlock`, `reorderBlocks`
     - Re-sequence source_order values after deletion
     - Prevent deletion of last non-distractor block
     - _Requirements: 4.1, 4.3, 4.4, 4.5, 4.8_
 
-  - [ ] 5.4 Implement placement challenge operations in content manager
+  - [x] 5.4 Implement placement challenge operations in content manager
     - Implement `getChallenges`, `getChallengeById`, `updateChallenge`, `addExerciseToChallenge`, `removeExerciseFromChallenge`, `reorderChallengeExercises`
     - Validate level ordering and required correct count before persisting
     - _Requirements: 5.1, 5.2, 5.3, 5.5_
 
-  - [ ]* 5.5 Write property test for content creation round-trip (Property 2)
+  - [ ] 5.5 Write property test for content creation round-trip (Property 2)
     - **Property 2: Content creation round-trip**
     - **Validates: Requirements 2.3, 2.5, 3.3, 4.3, 5.3**
 
-  - [ ]* 5.6 Write property test for cascade deletion completeness (Property 3)
+  - [ ] 5.6 Write property test for cascade deletion completeness (Property 3)
     - **Property 3: Cascade deletion completeness**
     - **Validates: Requirements 2.8, 3.7**
 
-- [ ] 6. Checkpoint - Ensure all service layer and property tests pass
+- [x] 6. Checkpoint - Ensure all service layer and property tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. Implement admin role verification and layout
-  - [ ] 7.1 Implement admin role verification utility
+  - [x] 7.1 Implement admin role verification utility
     - Create `src/lib/utils/verify-admin.ts`
     - Implement `verifyAdminRole` function that checks user role via Supabase
     - Return boolean indicating admin status; fail closed on service errors
@@ -144,7 +144,7 @@ Implement a role-gated admin content management system within the existing Next.
     - Each segment is a clickable link navigating to that level
     - _Requirements: 7.2_
 
-  - [ ]* 7.5 Write property test for breadcrumb generation (Property 11)
+  - [ ] 7.5 Write property test for breadcrumb generation (Property 11)
     - **Property 11: Breadcrumb generation from path**
     - **Validates: Requirements 7.2**
 
@@ -305,7 +305,7 @@ Implement a role-gated admin content management system within the existing Next.
     - Success notifications auto-dismiss after 3 seconds; error notifications persist
     - _Requirements: 7.3, 7.4, 7.5_
 
-  - [ ]* 15.3 Write integration tests for admin CRUD flows
+  - [ ] 15.3 Write integration tests for admin CRUD flows
     - Test full lesson CRUD cycle via API routes
     - Test role verification on all admin API endpoints
     - Test cascade deletion removes all descendants

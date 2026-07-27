@@ -33,3 +33,34 @@ export type {
 } from './progress';
 
 export type { Database, Json } from './database';
+
+export type {
+  UserRole,
+  CEFRLevel,
+  LearningPathStatus,
+  LessonStatus,
+  ExerciseType,
+  BlockCategory as AdminBlockCategory,
+  AdminUser,
+  LearningPath,
+  Unit,
+  AdminLesson,
+  AdminExercise,
+  GrammarBlock as AdminGrammarBlock,
+  DragDropContent,
+  MultipleChoiceContent,
+  SentenceOrderingContent,
+  FillInBlankContent,
+  RewriteSentenceContent,
+  FreeWritingContent,
+  AdminPlacementChallenge,
+  Achievement,
+  KPIMetric,
+  ChartDataPoint,
+  AdminNotification,
+  AIInsight,
+  PlatformSettings,
+  AdminSection,
+} from './admin';
+
+export { ROLE_PERMISSIONS } from './admin';

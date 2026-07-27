@@ -1,0 +1,92 @@
+[
+  {
+    "id": "notif-1",
+    "type": "registration",
+    "title": "New Student Registration",
+    "description": "Maria García registered and started the A1 learning path.",
+    "isRead": false,
+    "contextUrl": "/admin/students/student-1",
+    "createdAt": "2024-12-02T09:55:00Z"
+  },
+  {
+    "id": "notif-2",
+    "type": "challenge_completion",
+    "title": "Placement Challenge Completed",
+    "description": "Carlos López completed the B1 placement challenge with 85% score.",
+    "isRead": false,
+    "contextUrl": "/admin/students/student-2",
+    "createdAt": "2024-12-02T09:30:00Z"
+  },
+  {
+    "id": "notif-3",
+    "type": "ai_generation",
+    "title": "AI Content Generated",
+    "description": "New B2 lesson on conditionals generated successfully.",
+    "isRead": true,
+    "contextUrl": "/admin/ai-studio",
+    "createdAt": "2024-12-02T08:00:00Z"
+  },
+  {
+    "id": "notif-4",
+    "type": "system_error",
+    "title": "Database Connection Issue",
+    "description": "Brief connection timeout to Supabase detected at 14:32 UTC.",
+    "isRead": false,
+    "contextUrl": "/admin/settings",
+    "createdAt": "2024-12-02T06:00:00Z"
+  },
+  {
+    "id": "notif-5",
+    "type": "ai_insight",
+    "title": "Grammar Pattern Detected",
+    "description": "42% of B1 students struggle with past perfect. Consider adding exercises.",
+    "isRead": true,
+    "contextUrl": "/admin/analytics",
+    "createdAt": "2024-12-01T10:00:00Z"
+  },
+  {
+    "id": "notif-6",
+    "type": "registration",
+    "title": "New Student Registration",
+    "description": "Ana Torres registered via the referral program.",
+    "isRead": true,
+    "contextUrl": "/admin/students/student-3",
+    "createdAt": "2024-11-30T10:00:00Z"
+  },
+  {
+    "id": "notif-7",
+    "type": "challenge_completion",
+    "title": "Challenge Passed",
+    "description": "Pedro Martín passed the C1 placement challenge on second attempt.",
+    "isRead": true,
+    "contextUrl": "/admin/students/student-4",
+    "createdAt": "2024-11-29T10:00:00Z"
+  },
+  {
+    "id": "notif-8",
+    "type": "ai_generation",
+    "title": "Batch Content Generated",
+    "description": "5 new exercises for A2 present tense topic created via AI Studio.",
+    "isRead": true,
+    "contextUrl": "/admin/ai-studio",
+    "createdAt": "2024-11-27T10:00:00Z"
+  },
+  {
+    "id": "notif-9",
+    "type": "ai_insight",
+    "title": "Retention Drop Detected",
+    "description": "A2 student retention dropped 15% this week. Review suggested.",
+    "isRead": false,
+    "contextUrl": "/admin/analytics",
+    "createdAt": "2024-11-26T10:00:00Z"
+  },
+  {
+    "id": "notif-10",
+    "type": "system_error",
+    "title": "AI Service Timeout",
+    "description": "AWS Bedrock response exceeded 30s timeout for content generation.",
+    "isRead": true,
+    "contextUrl": "/admin/settings",
+    "createdAt": "2024-11-24T10:00:00Z"
+  }
+]

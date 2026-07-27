@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ach-1",
+    "title": "First Steps",
+    "description": "Complete your first lesson and begin your learning journey.",
+    "badgeIcon": "🎯",
+    "xpReward": 50,
+    "triggerCriteria": "lessons_completed",
+    "thresholdValue": 1,
+    "unlockCount": 234,
+    "createdAt": "2024-08-01T10:00:00Z"
+  },
+  {
+    "id": "ach-2",
+    "title": "Week Warrior",
+    "description": "Maintain a 7-day learning streak without missing a day.",
+    "badgeIcon": "🔥",
+    "xpReward": 200,
+    "triggerCriteria": "streak_days",
+    "thresholdValue": 7,
+    "unlockCount": 89,
+    "createdAt": "2024-08-15T14:30:00Z"
+  },
+  {
+    "id": "ach-3",
+    "title": "Grammar Master",
+    "description": "Achieve a grammar score of 90 or higher on any assessment.",
+    "badgeIcon": "📝",
+    "xpReward": 500,
+    "triggerCriteria": "grammar_score",
+    "thresholdValue": 90,
+    "unlockCount": 42,
+    "createdAt": "2024-09-01T08:00:00Z"
+  },
+  {
+    "id": "ach-4",
+    "title": "Challenge Champion",
+    "description": "Pass a placement challenge and prove your proficiency level.",
+    "badgeIcon": "🏆",
+    "xpReward": 300,
+    "triggerCriteria": "challenge_passed",
+    "thresholdValue": 1,
+    "unlockCount": 156,
+    "createdAt": "2024-09-10T11:00:00Z"
+  },
+  {
+    "id": "ach-5",
+    "title": "Practice Makes Perfect",
+    "description": "Complete 50 exercises across all lesson types.",
+    "badgeIcon": "💪",
+    "xpReward": 400,
+    "triggerCriteria": "exercises_completed",
+    "thresholdValue": 50,
+    "unlockCount": 67,
+    "createdAt": "2024-09-20T16:00:00Z"
+  },
+  {
+    "id": "ach-6",
+    "title": "Month-Long Dedication",
+    "description": "Keep a 30-day streak going strong. True commitment!",
+    "badgeIcon": "⭐",
+    "xpReward": 1000,
+    "triggerCriteria": "streak_days",
+    "thresholdValue": 30,
+    "unlockCount": 12,
+    "createdAt": "2024-10-05T09:00:00Z"
+  }
+]

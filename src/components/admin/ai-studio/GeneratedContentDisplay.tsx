@@ -106,6 +106,7 @@ const CATEGORY_COLORS: Record<BlockCategory, { bg: string; text: string; badge: 
   place: { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-800 dark:text-pink-200', badge: 'bg-pink-500' },
   connector: { bg: 'bg-teal-100 dark:bg-teal-900/30', text: 'text-teal-800 dark:text-teal-200', badge: 'bg-teal-500' },
   modifier: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-800 dark:text-amber-200', badge: 'bg-amber-500' },
+  contrast: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-800 dark:text-red-200', badge: 'bg-red-500' },
 };
 
 // ─── Section Header Component ────────────────────────────────────────────────

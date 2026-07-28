@@ -238,6 +238,19 @@ export interface AdminNotification {
 
 // ─── Platform Settings ───────────────────────────────────────────────────────
 
+/** An AI-generated learning insight for the analytics dashboard */
+export interface AIInsight {
+  id: string;
+  title: string;
+  description: string;
+  affectedStudentCount: number;
+  priority: 'high' | 'medium' | 'low';
+  suggestedAction: string;
+  actionType: string;
+  actionParams: Record<string, string>;
+  generatedAt: string;
+}
+
 /** Platform-wide configuration managed by administrators */
 export interface PlatformSettings {
   brand: {

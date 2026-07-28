@@ -69,3 +69,31 @@ export interface DraggableBlockProps {
   disabled?: boolean;
   showTooltip?: boolean;
 }
+
+// ─── Reducer Types ───────────────────────────────────────────────────────────
+
+/** Feedback status for the exercise UI */
+export type FeedbackStatus = 'idle' | 'loading' | 'success' | 'error' | 'unavailable';
+
+/** State managed by the exercise reducer */
+export interface ExerciseState {
+  exercise: Exercise;
+  canvas: GrammarBlock[];
+  available: GrammarBlock[];
+  feedback: import('./feedback').FeedbackResponse | null;
+  feedbackStatus: FeedbackStatus;
+  hintsUsed: number;
+  attempts: number;
+  incorrectBlockIds: string[];
+}
+
+/** Actions dispatched to the exercise reducer */
+export type ExerciseAction =
+  | { type: 'PLACE_BLOCK'; blockId: string; index: number }
+  | { type: 'REMOVE_BLOCK'; blockId: string }
+  | { type: 'REORDER_BLOCKS'; fromIndex: number; toIndex: number }
+  | { type: 'SUBMIT_START' }
+  | { type: 'SUBMIT_SUCCESS'; feedback: import('./feedback').FeedbackResponse }
+  | { type: 'SUBMIT_ERROR' }
+  | { type: 'USE_HINT'; hint?: string }
+  | { type: 'RESET' };

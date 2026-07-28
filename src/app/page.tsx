@@ -31,7 +31,7 @@ export default function Home() {
             Build English, Block by Block
           </p>
           <Link
-            href="/demo"
+            href="/auth/register"
             className="inline-flex items-center gap-2 bg-wp-primary hover:bg-wp-primary-hover text-white font-semibold text-lg px-8 py-4 rounded-lg transition-colors shadow-lg hover:shadow-xl"
           >
             ▶ Start Learning
@@ -64,11 +64,11 @@ export default function Home() {
               <Brain className="w-7 h-7 text-block-subject" />
             </div>
             <h3 className="font-semibold text-foreground text-lg mb-2">
-              AI Feedback
+              Step-by-Step Explanations
             </h3>
             <p className="text-sm text-muted-foreground">
-              Get instant, intelligent feedback on your sentence constructions
-              powered by Amazon Bedrock.
+              Understand every mistake with clear, guided explanations for
+              each grammar concept.
             </p>
           </div>
 

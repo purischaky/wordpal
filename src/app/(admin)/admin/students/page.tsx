@@ -128,7 +128,9 @@ export default function StudentsPage() {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilters, setActiveFilters] = useState<Record<string, unknown>>({});
+  // Defaults to students only — staff accounts (admin/instructor/content_creator)
+  // share this table but shouldn't be counted or shown as students by default.
+  const [activeFilters, setActiveFilters] = useState<Record<string, unknown>>({ role: 'student' });
   const [sortState, setSortState] = useState<SortState>({ column: 'progressPercentage', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
 

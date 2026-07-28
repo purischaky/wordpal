@@ -1,25 +1,30 @@
 'use client';
 
-import { use, useState, useCallback } from 'react';
+import { use, useEffect, useState } from 'react';
 import { DashboardCard, DashboardCardEmpty } from '@/components/admin/design-system/DashboardCard';
-import { GrammarRadar } from '@/components/admin/design-system/GrammarRadar';
 import { Timeline, TimelineEvent } from '@/components/admin/design-system/Timeline';
-import { getStudentProfile } from '@/data/admin';
-import type { BlockCategory, CEFRLevel } from '@/types/admin';
+import type { CEFRLevel } from '@/types/admin';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types (mirrors the JSON shape of the get_student_profile RPC) ───────────
 
 interface StudentProfileData {
   id: string;
-  name: string;
   email: string;
-  role: string;
-  joinDate: string;
+  displayName: string;
   avatarUrl: string | null;
   status: 'active' | 'inactive' | 'suspended';
+  cefrLevel: CEFRLevel;
+  role: string;
+  joinDate: string;
   currentLearningPath: string | null;
   currentLesson: string | null;
-  grammarScores: { category: BlockCategory; score: number }[];
+  totalXp: number;
+  streakCurrent: number;
+  streakLongest: number;
+  lastActivityDate: string | null;
+  placementResults: PlacementResult[];
+  achievements: StudentAchievement[];
+  timelineEvents: TimelineEvent[];
 }
 
 interface StudentAchievement {
@@ -35,19 +40,6 @@ interface PlacementResult {
   score: number;
   result: 'pass' | 'fail';
   targetLevel: CEFRLevel;
-}
-
-interface AICoachSummary {
-  weakAreas: string[];
-  recommendedLessons: string[];
-  assessment: string;
-}
-
-interface Certificate {
-  id: string;
-  title: string;
-  type: string;
-  issueDate: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -83,65 +75,66 @@ export default function StudentProfilePage({
 }) {
   const { id } = use(params);
 
-  // Load student profile from centralized data
-  const studentData = getStudentProfile(id);
-
-  // Derive profile data (fallback for unknown IDs)
-  const profile: StudentProfileData = studentData
-    ? {
-        id: studentData.id,
-        name: studentData.name,
-        email: studentData.email,
-        role: studentData.role,
-        joinDate: studentData.joinDate,
-        avatarUrl: studentData.avatarUrl,
-        status: studentData.status,
-        currentLearningPath: studentData.currentLearningPath,
-        currentLesson: studentData.currentLesson,
-        grammarScores: studentData.grammarScores as { category: BlockCategory; score: number }[],
-      }
-    : {
-        id,
-        name: 'Unknown Student',
-        email: 'unknown@example.com',
-        role: 'student',
-        joinDate: '2024-01-01T00:00:00Z',
-        avatarUrl: null,
-        status: 'active',
-        currentLearningPath: null,
-        currentLesson: null,
-        grammarScores: [],
-      };
-
-  const achievements: StudentAchievement[] = studentData?.achievements ?? [];
-  const placementResults: PlacementResult[] = (studentData?.placementResults ?? []) as PlacementResult[];
-  const timelineEvents: TimelineEvent[] = (studentData?.timelineEvents ?? []) as TimelineEvent[];
-  const certificates: Certificate[] = studentData?.certificates ?? [];
-  const initialAiCoach: AICoachSummary | null = studentData?.aiCoach ?? null;
-
-  // AI Coach state with retry
-  const [aiCoachData, setAiCoachData] = useState<AICoachSummary | null>(initialAiCoach);
-  const [aiCoachError, setAiCoachError] = useState(false);
-  const [aiCoachLoading, setAiCoachLoading] = useState(false);
-
-  // Placement results pagination
+  const [profile, setProfile] = useState<StudentProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [placementPage, setPlacementPage] = useState(1);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setNotFound(false);
+      try {
+        const res = await fetch(`/api/admin/students/${id}`);
+        const json = await res.json();
+        if (cancelled) return;
+        if (res.status === 404) {
+          setNotFound(true);
+        } else if (json.data) {
+          setProfile(json.data);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  const placementResults = profile?.placementResults ?? [];
+  const achievements = profile?.achievements ?? [];
+  const timelineEvents = profile?.timelineEvents ?? [];
+
   const placementPageSize = 20;
   const placementTotalPages = Math.max(1, Math.ceil(placementResults.length / placementPageSize));
   const paginatedPlacements = [...placementResults]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice((placementPage - 1) * placementPageSize, placementPage * placementPageSize);
 
-  // AI Coach retry handler
-  const handleAiCoachRetry = useCallback(() => {
-    setAiCoachLoading(true);
-    setAiCoachError(false);
-    // Simulate retry - in real app, call API
-    setTimeout(() => {
-      setAiCoachData(initialAiCoach);
-      setAiCoachLoading(false);
-    }, 1000);
-  }, [initialAiCoach]);
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-48 animate-skeleton-pulse rounded bg-muted" />
+        <div className="h-40 animate-skeleton-pulse rounded-xl bg-muted" />
+      </div>
+    );
+  }
+
+  if (notFound || !profile) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-foreground">Student Profile</h1>
+        <DashboardCard title="Not Found">
+          <DashboardCardEmpty message="This student could not be found" />
+        </DashboardCard>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -163,11 +156,11 @@ export default function StudentProfilePage({
             {profile.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
-                alt={`${profile.name} avatar`}
+                alt={`${profile.displayName} avatar`}
                 className="h-16 w-16 rounded-full object-cover"
               />
             ) : (
-              profile.name.charAt(0).toUpperCase()
+              profile.displayName.charAt(0).toUpperCase()
             )}
           </div>
 
@@ -175,7 +168,7 @@ export default function StudentProfilePage({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-semibold text-card-foreground">
-                {profile.name}
+                {profile.displayName}
               </h2>
               <StatusBadge status={profile.status} />
             </div>
@@ -193,22 +186,48 @@ export default function StudentProfilePage({
                 <p className="text-sm text-card-foreground">{formatDate(profile.joinDate)}</p>
               </div>
               <div>
-                <span className="text-xs font-medium text-muted-foreground">Status</span>
-                <p className="text-sm capitalize text-card-foreground">{profile.status}</p>
+                <span className="text-xs font-medium text-muted-foreground">CEFR Level</span>
+                <p className="text-sm text-card-foreground">{profile.cefrLevel}</p>
               </div>
             </div>
           </div>
         </div>
       </DashboardCard>
 
+      {/* Activity Stats */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <DashboardCard>
+          <span className="text-xs font-medium text-muted-foreground">Total XP</span>
+          <p className="mt-1 text-2xl font-bold text-primary">{profile.totalXp}</p>
+        </DashboardCard>
+        <DashboardCard>
+          <span className="text-xs font-medium text-muted-foreground">Current Streak</span>
+          <p className="mt-1 text-2xl font-bold text-card-foreground">
+            🔥 {profile.streakCurrent} {profile.streakCurrent === 1 ? 'day' : 'days'}
+          </p>
+        </DashboardCard>
+        <DashboardCard>
+          <span className="text-xs font-medium text-muted-foreground">Longest Streak</span>
+          <p className="mt-1 text-2xl font-bold text-card-foreground">
+            {profile.streakLongest} {profile.streakLongest === 1 ? 'day' : 'days'}
+          </p>
+        </DashboardCard>
+        <DashboardCard>
+          <span className="text-xs font-medium text-muted-foreground">Last Active</span>
+          <p className="mt-1 text-2xl font-bold text-card-foreground">
+            {profile.lastActivityDate ? formatDate(profile.lastActivityDate) : 'Never'}
+          </p>
+        </DashboardCard>
+      </div>
+
       {/* Current Learning Path / Lesson */}
       <DashboardCard title="Current Learning Path & Lesson">
-        {profile.currentLearningPath ? (
+        {profile.currentLearningPath || profile.currentLesson ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-lg border border-border bg-muted/50 p-4">
               <span className="text-xs font-medium text-muted-foreground">Learning Path</span>
               <p className="mt-1 text-sm font-medium text-card-foreground">
-                {profile.currentLearningPath}
+                {profile.currentLearningPath ?? 'Not started'}
               </p>
             </div>
             <div className="rounded-lg border border-border bg-muted/50 p-4">
@@ -219,46 +238,34 @@ export default function StudentProfilePage({
             </div>
           </div>
         ) : (
-          <DashboardCardEmpty message="No learning path assigned yet" />
+          <DashboardCardEmpty message="No learning activity yet — the student hasn't started an exercise." />
         )}
       </DashboardCard>
 
-      {/* Grammar Mastery & Achievements Row */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Grammar Mastery Radar Chart */}
-        <DashboardCard title="Grammar Mastery">
-          {profile.grammarScores.length > 0 ? (
-            <GrammarRadar data={profile.grammarScores} size={280} />
-          ) : (
-            <DashboardCardEmpty message="No grammar mastery data available yet" />
-          )}
-        </DashboardCard>
-
-        {/* Achievements */}
-        <DashboardCard title="Achievements">
-          {achievements.length > 0 ? (
-            <ul className="space-y-3" role="list" aria-label="Recent achievements">
-              {achievements.map((achievement) => (
-                <li key={achievement.id} className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-base" aria-hidden="true">
-                    {achievement.badgeIcon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-card-foreground">
-                      {achievement.title}
-                    </p>
-                    <time className="text-xs text-muted-foreground" dateTime={achievement.date}>
-                      {formatDate(achievement.date)}
-                    </time>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <DashboardCardEmpty message="No achievements earned yet" />
-          )}
-        </DashboardCard>
-      </div>
+      {/* Achievements */}
+      <DashboardCard title="Achievements">
+        {achievements.length > 0 ? (
+          <ul className="space-y-3" role="list" aria-label="Recent achievements">
+            {achievements.map((achievement) => (
+              <li key={achievement.id} className="flex items-center gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-base" aria-hidden="true">
+                  {achievement.badgeIcon}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-card-foreground">
+                    {achievement.title}
+                  </p>
+                  <time className="text-xs text-muted-foreground" dateTime={achievement.date}>
+                    {formatDate(achievement.date)}
+                  </time>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <DashboardCardEmpty message="No achievements earned yet" />
+        )}
+      </DashboardCard>
 
       {/* Placement Challenge Results */}
       <DashboardCard title="Placement Challenge Results">
@@ -335,88 +342,6 @@ export default function StudentProfilePage({
         )}
       </DashboardCard>
 
-      {/* AI Coach Summary */}
-      <DashboardCard title="AI Coach Summary">
-        {aiCoachLoading ? (
-          <div className="space-y-3">
-            <div className="h-4 w-full animate-[skeleton-pulse_1500ms_ease-in-out_infinite] rounded bg-muted" />
-            <div className="h-4 w-2/3 animate-[skeleton-pulse_1500ms_ease-in-out_infinite] rounded bg-muted" />
-            <div className="h-4 w-1/2 animate-[skeleton-pulse_1500ms_ease-in-out_infinite] rounded bg-muted" />
-          </div>
-        ) : aiCoachError ? (
-          <div className="flex flex-col items-center justify-center py-6 text-center">
-            <svg
-              className="mb-3 h-8 w-8 text-destructive/60"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-              />
-            </svg>
-            <p className="text-sm text-muted-foreground">
-              AI Coach Summary is temporarily unavailable
-            </p>
-            <button
-              type="button"
-              onClick={handleAiCoachRetry}
-              className="mt-3 rounded-[12px] border border-primary bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              Retry
-            </button>
-          </div>
-        ) : aiCoachData ? (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* Weak Areas */}
-            <div>
-              <h4 className="mb-2 text-xs font-medium text-muted-foreground">
-                Weak Areas ({aiCoachData.weakAreas.length})
-              </h4>
-              <ul className="space-y-1.5">
-                {aiCoachData.weakAreas.map((area, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm text-card-foreground">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive/60" aria-hidden="true" />
-                    {area}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Recommended Lessons */}
-            <div>
-              <h4 className="mb-2 text-xs font-medium text-muted-foreground">
-                Recommended Lessons ({aiCoachData.recommendedLessons.length})
-              </h4>
-              <ul className="space-y-1.5">
-                {aiCoachData.recommendedLessons.map((lesson, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm text-card-foreground">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" aria-hidden="true" />
-                    {lesson}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Assessment */}
-            <div>
-              <h4 className="mb-2 text-xs font-medium text-muted-foreground">
-                Assessment
-              </h4>
-              <p className="text-sm leading-relaxed text-card-foreground">
-                {aiCoachData.assessment.slice(0, 300)}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <DashboardCardEmpty message="No AI Coach data available yet" />
-        )}
-      </DashboardCard>
-
       {/* Learning Progress Timeline */}
       <DashboardCard title="Learning Progress">
         {timelineEvents.length > 0 ? (
@@ -426,45 +351,6 @@ export default function StudentProfilePage({
           />
         ) : (
           <DashboardCardEmpty message="No learning progress events yet" />
-        )}
-      </DashboardCard>
-
-      {/* Certificates */}
-      <DashboardCard title="Certificates">
-        {certificates.length > 0 ? (
-          <ul className="space-y-3" role="list" aria-label="Earned certificates">
-            {certificates.map((cert) => (
-              <li key={cert.id} className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10" aria-hidden="true">
-                  <svg
-                    className="h-5 w-5 text-primary"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342"
-                    />
-                  </svg>
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-card-foreground">
-                    {cert.title}
-                  </p>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{cert.type}</span>
-                    <span aria-hidden="true">·</span>
-                    <time dateTime={cert.issueDate}>{formatDate(cert.issueDate)}</time>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <DashboardCardEmpty message="No certificates earned yet" />
         )}
       </DashboardCard>
     </div>

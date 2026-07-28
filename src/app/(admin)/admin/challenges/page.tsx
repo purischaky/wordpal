@@ -3,39 +3,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import type { AdminPlacementChallenge } from '@/types/admin';
-import { validateChallengePublish } from '@/lib/validators/challenge';
-import type { ChallengeQuestion } from '@/lib/validators/challenge';
-
-// ─── Data ────────────────────────────────────────────────────────────────────
-
-/** Mock questions for challenges that have them */
-const MOCK_QUESTIONS_MAP: Record<string, ChallengeQuestion[]> = {
-  'ch-1': Array.from({ length: 15 }, (_, i) => ({
-    id: `ch-1-q-${i + 1}`,
-    text: `Question ${i + 1} for Beginner Grammar`,
-    hasCorrectAnswer: true,
-  })),
-  'ch-2': Array.from({ length: 20 }, (_, i) => ({
-    id: `ch-2-q-${i + 1}`,
-    text: `Question ${i + 1} for Elementary Level`,
-    hasCorrectAnswer: true,
-  })),
-  'ch-3': Array.from({ length: 25 }, (_, i) => ({
-    id: `ch-3-q-${i + 1}`,
-    text: `Question ${i + 1} for Intermediate Grammar`,
-    hasCorrectAnswer: true,
-  })),
-  'ch-4': Array.from({ length: 20 }, (_, i) => ({
-    id: `ch-4-q-${i + 1}`,
-    text: `Question ${i + 1} for Upper-Intermediate`,
-    hasCorrectAnswer: i < 18, // 2 questions missing answers
-  })),
-  'ch-5': Array.from({ length: 30 }, (_, i) => ({
-    id: `ch-5-q-${i + 1}`,
-    text: `Question ${i + 1} for Advanced Academic`,
-    hasCorrectAnswer: i < 28, // 2 questions missing answers
-  })),
-};
 
 // ─── Helper Functions ────────────────────────────────────────────────────────
 
@@ -78,7 +45,6 @@ export default function ChallengesPage() {
   const [challenges, setChallenges] = useState<AdminPlacementChallenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishErrors, setPublishErrors] = useState<Record<string, string[]>>({});
-  const [questionsWithoutAnswers, setQuestionsWithoutAnswers] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     async function fetchChallenges() {
@@ -102,46 +68,25 @@ export default function ChallengesPage() {
     return challenges.filter((ch) => ch.status === statusFilter);
   }, [statusFilter, challenges]);
 
-  function handlePublish(challengeId: string) {
-    // Clear previous errors for this challenge
+  async function handlePublish(challengeId: string) {
     setPublishErrors((prev) => {
       const next = { ...prev };
       delete next[challengeId];
       return next;
     });
-    setQuestionsWithoutAnswers((prev) => {
-      const next = { ...prev };
-      delete next[challengeId];
-      return next;
-    });
 
-    const challenge = challenges.find((ch) => ch.id === challengeId);
-    if (!challenge) return;
+    try {
+      const res = await fetch(`/api/admin/challenges/${challengeId}/publish`, { method: 'PATCH' });
+      const json = await res.json();
 
-    // Get questions for this challenge (from mock data or challenge.questions)
-    const questions: ChallengeQuestion[] = MOCK_QUESTIONS_MAP[challengeId] ?? [];
-
-    const result = validateChallengePublish({
-      configuredQuestionCount: challenge.questionCount,
-      questions,
-    });
-
-    if (result.valid) {
-      // Update status to published
-      setChallenges((prev) =>
-        prev.map((ch) =>
-          ch.id === challengeId ? { ...ch, status: 'published' as const } : ch
-        )
-      );
-    } else {
-      // Show validation errors
-      setPublishErrors((prev) => ({ ...prev, [challengeId]: result.errors }));
-      if (result.questionsWithoutAnswers.length > 0) {
-        setQuestionsWithoutAnswers((prev) => ({
-          ...prev,
-          [challengeId]: result.questionsWithoutAnswers,
-        }));
+      if (!res.ok) {
+        setPublishErrors((prev) => ({ ...prev, [challengeId]: json.details ?? [json.error ?? 'Failed to publish'] }));
+        return;
       }
+
+      setChallenges((prev) => prev.map((ch) => (ch.id === challengeId ? json.data : ch)));
+    } catch {
+      setPublishErrors((prev) => ({ ...prev, [challengeId]: ['Failed to publish challenge. Please try again.'] }));
     }
   }
 
@@ -313,12 +258,6 @@ export default function ChallengesPage() {
                             {error}
                           </p>
                         ))}
-                        {questionsWithoutAnswers[challenge.id] && questionsWithoutAnswers[challenge.id].length > 0 && (
-                          <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-                            Questions without answers: {questionsWithoutAnswers[challenge.id].slice(0, 5).join(', ')}
-                            {questionsWithoutAnswers[challenge.id].length > 5 && ` and ${questionsWithoutAnswers[challenge.id].length - 5} more`}
-                          </p>
-                        )}
                       </div>
                     )}
                   </td>

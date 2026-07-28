@@ -1,6 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+
+function shuffle<T>(items: T[]): T[] {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 import type {
   ExerciseType,
   DragDropContent,
@@ -105,17 +114,8 @@ function getTypeLabel(type: ExerciseType): string {
 // ─── Drag and Drop Preview ───────────────────────────────────────────────────
 
 function DragAndDropPreview({ content }: { content: DragDropContent }) {
-  const shuffledBlocks = useMemo(() => {
-    const blocks = [...content.blocks];
-    for (let i = blocks.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
-    }
-    return blocks;
-  }, [content.blocks]);
-
-  const [available, setAvailable] = useState(shuffledBlocks);
-  const [placed, setPlaced] = useState<typeof shuffledBlocks>([]);
+  const [available, setAvailable] = useState(() => shuffle(content.blocks));
+  const [placed, setPlaced] = useState<typeof content.blocks>([]);
 
   const handlePlace = (blockId: string) => {
     const block = available.find((b) => b.id === blockId);
@@ -261,17 +261,10 @@ function FillInBlankPreview({ content }: { content: FillInBlankContent }) {
 // ─── Sentence Ordering Preview ───────────────────────────────────────────────
 
 function SentenceOrderingPreview({ content }: { content: SentenceOrderingContent }) {
-  const shuffledFragments = useMemo(() => {
-    const fragments = content.fragments.map((f, i) => ({ id: `frag-${i}`, text: f }));
-    for (let i = fragments.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [fragments[i], fragments[j]] = [fragments[j], fragments[i]];
-    }
-    return fragments;
-  }, [content.fragments]);
-
-  const [available, setAvailable] = useState(shuffledFragments);
-  const [ordered, setOrdered] = useState<typeof shuffledFragments>([]);
+  const [available, setAvailable] = useState(() =>
+    shuffle(content.fragments.map((f, i) => ({ id: `frag-${i}`, text: f })))
+  );
+  const [ordered, setOrdered] = useState<typeof available>([]);
 
   const handlePlace = (id: string) => {
     const frag = available.find((f) => f.id === id);

@@ -3,7 +3,17 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import type { CEFRLevel, ExerciseType, LessonStatus } from '@/types/admin';
+import type {
+  CEFRLevel,
+  LessonStatus,
+  AdminExercise,
+  DragDropContent,
+  MultipleChoiceContent,
+  SentenceOrderingContent,
+  FillInBlankContent,
+  RewriteSentenceContent,
+  FreeWritingContent,
+} from '@/types/admin';
 import { validateLessonForm, type LessonFormErrors } from '@/lib/validators/lesson';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -18,46 +28,34 @@ interface LessonFormData {
   learningObjectives: string[];
 }
 
-interface ExerciseItem {
-  id: string;
-  type: ExerciseType;
-  content: string;
-  status: LessonStatus;
-}
+type ExerciseItem = AdminExercise;
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const CEFR_LEVELS: CEFRLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const DIFFICULTY_OPTIONS = [1, 2, 3, 4, 5] as const;
 
-// ─── Mock Data ───────────────────────────────────────────────────────────────
+// ─── Exercise content preview ─────────────────────────────────────────────────
 
-const MOCK_EXERCISES: ExerciseItem[] = [
-  {
-    id: 'ex-1',
-    type: 'drag-and-drop',
-    content: 'Build a present perfect sentence using the correct form of have/has and the past participle of the verb given.',
-    status: 'published',
-  },
-  {
-    id: 'ex-2',
-    type: 'multiple-choice',
-    content: 'Choose the correct present perfect form: She ___ (visit) Paris three times.',
-    status: 'published',
-  },
-  {
-    id: 'ex-3',
-    type: 'fill-in-blank',
-    content: 'I ___ never ___ sushi before. (eat)',
-    status: 'draft',
-  },
-  {
-    id: 'ex-4',
-    type: 'rewrite-sentence',
-    content: 'Rewrite using present perfect: I started learning English five years ago and I still learn it.',
-    status: 'incomplete',
-  },
-];
+/** Extracts a short human-readable preview of an exercise's type-specific content. */
+function getExercisePreview(ex: ExerciseItem): string {
+  switch (ex.type) {
+    case 'drag-and-drop':
+      return (ex.content as DragDropContent).targetSentence || '(no target sentence)';
+    case 'multiple-choice':
+      return (ex.content as MultipleChoiceContent).question;
+    case 'sentence-ordering':
+      return (ex.content as SentenceOrderingContent).fragments.join(' / ');
+    case 'fill-in-blank':
+      return (ex.content as FillInBlankContent).sentence;
+    case 'rewrite-sentence':
+      return (ex.content as RewriteSentenceContent).originalSentence;
+    case 'free-writing':
+      return (ex.content as FreeWritingContent).prompt;
+    default:
+      return '';
+  }
+}
 
 // ─── Preview Modal ───────────────────────────────────────────────────────────
 
@@ -135,7 +133,10 @@ function PreviewModal({
                       <span className="text-xs text-muted-foreground">{ex.status}</span>
                     </div>
                     <p className="mt-1 text-sm text-foreground">
-                      {ex.content.length > 60 ? ex.content.slice(0, 60) + '…' : ex.content}
+                      {(() => {
+                        const preview = getExercisePreview(ex);
+                        return preview.length > 60 ? preview.slice(0, 60) + '…' : preview;
+                      })()}
                     </p>
                   </div>
                 ))}
@@ -154,10 +155,15 @@ function PreviewModal({
 
 // ─── Exercises Section ───────────────────────────────────────────────────────
 
-function ExercisesSection({ exercises }: { exercises: ExerciseItem[] }) {
-  const truncate = (text: string, max: number) =>
-    text.length > max ? text.slice(0, max) + '…' : text;
-
+function ExercisesSection({
+  exercises,
+  lessonId,
+  onDelete,
+}: {
+  exercises: ExerciseItem[];
+  lessonId: string;
+  onDelete: (id: string) => void;
+}) {
   const statusColor = (status: LessonStatus) => {
     switch (status) {
       case 'published':
@@ -169,47 +175,75 @@ function ExercisesSection({ exercises }: { exercises: ExerciseItem[] }) {
     }
   };
 
-  if (exercises.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-border p-6 text-center">
-        <p className="text-sm text-muted-foreground">
-          No exercises assigned to this lesson yet.
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Exercises can be added after saving the lesson.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="overflow-hidden rounded-xl border border-border">
-      <table className="w-full text-sm">
-        <thead className="border-b border-border bg-accent/30">
-          <tr>
-            <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Type</th>
-            <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Content</th>
-            <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {exercises.map((ex) => (
-            <tr key={ex.id} className="transition-colors hover:bg-accent/20">
-              <td className="px-4 py-2.5 font-medium text-foreground capitalize">
-                {ex.type.replace(/-/g, ' ')}
-              </td>
-              <td className="px-4 py-2.5 text-muted-foreground">
-                {truncate(ex.content, 60)}
-              </td>
-              <td className="px-4 py-2.5">
-                <span className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium capitalize ${statusColor(ex.status)}`}>
-                  {ex.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-3">
+      {exercises.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            No exercises assigned to this lesson yet.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-border">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border bg-accent/30">
+              <tr>
+                <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Type</th>
+                <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Content</th>
+                <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Status</th>
+                <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {exercises.map((ex) => {
+                const preview = getExercisePreview(ex);
+                return (
+                  <tr key={ex.id} className="transition-colors hover:bg-accent/20">
+                    <td className="px-4 py-2.5 font-medium text-foreground capitalize">
+                      {ex.type.replace(/-/g, ' ')}
+                    </td>
+                    <td className="px-4 py-2.5 text-muted-foreground">
+                      {preview.length > 60 ? preview.slice(0, 60) + '…' : preview}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium capitalize ${statusColor(ex.status)}`}>
+                        {ex.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        <Link
+                          href={`/admin/exercises/${ex.id}/edit?lessonId=${lessonId}`}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(ex.id)}
+                          className="text-xs font-medium text-destructive hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Link
+        href={`/admin/exercises/new?lessonId=${lessonId}`}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+      >
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Add Exercise
+      </Link>
     </div>
   );
 }
@@ -236,8 +270,39 @@ export default function EditLessonPage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [exercises, setExercises] = useState<ExerciseItem[]>([]);
+  const [lessonStatus, setLessonStatus] = useState<LessonStatus | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
-  const exercises: ExerciseItem[] = MOCK_EXERCISES;
+  const fetchExercises = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/exercises?lessonId=${lessonId}`);
+      const json = await res.json();
+      if (json.data) setExercises(json.data);
+    } catch (error) {
+      console.error('Failed to fetch exercises:', error);
+    }
+  }, [lessonId]);
+
+  useEffect(() => {
+    fetchExercises();
+  }, [fetchExercises]);
+
+  const handleDeleteExercise = useCallback(
+    async (exerciseId: string) => {
+      if (!window.confirm('Delete this exercise? This cannot be undone.')) return;
+      try {
+        const res = await fetch(`/api/admin/exercises/${exerciseId}`, { method: 'DELETE' });
+        if (res.ok) {
+          setExercises((prev) => prev.filter((e) => e.id !== exerciseId));
+        }
+      } catch (error) {
+        console.error('Failed to delete exercise:', error);
+      }
+    },
+    []
+  );
 
   // Load lesson data from API
   useEffect(() => {
@@ -257,6 +322,7 @@ export default function EditLessonPage() {
               estimatedDuration: found.estimatedDuration ? String(found.estimatedDuration) : '',
               learningObjectives: found.learningObjectives?.length ? found.learningObjectives : [''],
             });
+            setLessonStatus(found.status ?? null);
           }
         }
       } catch (error) {
@@ -383,6 +449,24 @@ export default function EditLessonPage() {
     },
     [formData, router, lessonId]
   );
+
+  const handlePublish = useCallback(async () => {
+    setPublishing(true);
+    setPublishError(null);
+    try {
+      const res = await fetch(`/api/admin/lessons/${lessonId}/publish`, { method: 'PATCH' });
+      const json = await res.json();
+      if (!res.ok) {
+        setPublishError(json.details ? json.details.join(' ') : json.error || 'Cannot publish: validation failed.');
+        return;
+      }
+      setLessonStatus('published');
+    } catch {
+      setPublishError('Failed to publish lesson. Please try again.');
+    } finally {
+      setPublishing(false);
+    }
+  }, [lessonId]);
 
   // Loading skeleton
   if (isLoading) {
@@ -693,8 +777,13 @@ export default function EditLessonPage() {
           <p className="mb-4 text-xs text-muted-foreground">
             Exercises assigned to this lesson.
           </p>
-          <ExercisesSection exercises={exercises} />
+          <ExercisesSection exercises={exercises} lessonId={lessonId} onDelete={handleDeleteExercise} />
         </div>
+
+        {/* Publish Error */}
+        {publishError && (
+          <p className="text-sm text-destructive" role="alert">{publishError}</p>
+        )}
 
         {/* Form Actions */}
         <div className="flex items-center justify-end gap-3">
@@ -704,6 +793,16 @@ export default function EditLessonPage() {
           >
             Cancel
           </Link>
+          {lessonStatus && lessonStatus !== 'published' && (
+            <button
+              type="button"
+              onClick={handlePublish}
+              disabled={publishing}
+              className="inline-flex items-center gap-2 rounded-[12px] bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {publishing ? 'Publishing...' : 'Publish'}
+            </button>
+          )}
           <button
             type="submit"
             disabled={isSubmitting || submitSuccess}

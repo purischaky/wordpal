@@ -9,10 +9,14 @@ import {
 } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { createSupabaseBrowserClient } from '@/lib/services/supabase-browser'
+import { getRoleFromAppMetadata, isValidRole } from '@/lib/services/role-service'
+import type { UserRole } from '@/types/admin'
 
 export interface AuthState {
   user: User | null
   session: Session | null
+  /** App role read from the JWT's app_metadata, resolved alongside the session. */
+  role: UserRole | null
   loading: boolean
   error: string | null
 }
@@ -21,6 +25,11 @@ export interface AuthContextValue extends AuthState {
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, displayName: string) => Promise<void>
   signOut: () => Promise<void>
+}
+
+function roleFromSession(session: Session | null): UserRole | null {
+  const raw = getRoleFromAppMetadata(session?.user?.app_metadata)
+  return isValidRole(raw) ? raw : null
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -119,17 +128,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase])
 
+  const role = useMemo(() => roleFromSession(session), [session])
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       session,
+      role,
       loading,
       error,
       signIn,
       signUp,
       signOut,
     }),
-    [user, session, loading, error, signIn, signUp, signOut]
+    [user, session, role, loading, error, signIn, signUp, signOut]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

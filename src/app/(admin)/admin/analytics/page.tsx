@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { ChartCard } from '@/components/admin/design-system/ChartCard';
-import { AIInsightsSection } from '@/components/admin/analytics/AIInsightsSection';
 import type { ChartDataPoint } from '@/types/admin';
 
 // ─── Date Range Types ────────────────────────────────────────────────────────
@@ -15,69 +14,9 @@ interface DateRangeState {
   customEnd: string;
 }
 
-// ─── Mock Data Generators ────────────────────────────────────────────────────
+// ─── Analytics Data Shape (mirrors get_analytics_data() in 0008_analytics.sql) ─
 
-function generateLineData(points: number, baseValue: number, variance: number): ChartDataPoint[] {
-  const data: ChartDataPoint[] = [];
-  let current = baseValue;
-  for (let i = 0; i < points; i++) {
-    current += Math.round((Math.random() - 0.4) * variance);
-    current = Math.max(0, current);
-    const date = new Date();
-    date.setDate(date.getDate() - (points - i));
-    data.push({
-      label: `${date.getMonth() + 1}/${date.getDate()}`,
-      value: current,
-      date: date.toISOString(),
-    });
-  }
-  return data;
-}
-
-function generateBarData(labels: string[], min: number, max: number): ChartDataPoint[] {
-  return labels.map((label) => ({
-    label,
-    value: Math.round(min + Math.random() * (max - min)),
-  }));
-}
-
-function generatePieData(): ChartDataPoint[] {
-  const categories = [
-    'Subject-Verb Agreement',
-    'Tense Errors',
-    'Article Misuse',
-    'Preposition Errors',
-    'Word Order',
-    'Pronoun Reference',
-  ];
-  return categories.map((label) => ({
-    label,
-    value: Math.round(5 + Math.random() * 30),
-    category: label,
-  }));
-}
-
-function generateHeatmapData(): ChartDataPoint[] {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const data: ChartDataPoint[] = [];
-  for (const day of days) {
-    for (let hour = 0; hour < 24; hour++) {
-      // Simulate higher activity during business hours on weekdays
-      const isWeekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(day);
-      const isBusinessHour = hour >= 8 && hour <= 20;
-      const base = isWeekday && isBusinessHour ? 40 : 10;
-      const value = Math.round(base + Math.random() * (isBusinessHour ? 60 : 20));
-      data.push({
-        label: `${day}-${hour}`,
-        value,
-        category: day,
-      });
-    }
-  }
-  return data;
-}
-
-function getChartData(range: PresetRange): {
+interface AnalyticsData {
   studentGrowth: ChartDataPoint[];
   lessonCompletion: ChartDataPoint[];
   grammarErrors: ChartDataPoint[];
@@ -87,33 +26,19 @@ function getChartData(range: PresetRange): {
   studentRetention: ChartDataPoint[];
   dailyActiveUsers: ChartDataPoint[];
   heatmap: ChartDataPoint[];
-} {
-  const pointCount = range === '7d' ? 7 : range === '30d' ? 30 : 20;
-
-  return {
-    studentGrowth: generateLineData(pointCount, 150, 15),
-    lessonCompletion: generateBarData(
-      ['Beginner A1', 'Elementary A2', 'Intermediate B1', 'Upper-Int B2', 'Advanced C1', 'Mastery C2'],
-      40,
-      95
-    ),
-    grammarErrors: generatePieData(),
-    difficultLessons: generateBarData(
-      ['Past Perfect', 'Conditionals III', 'Relative Clauses', 'Subjunctive', 'Passive Voice', 'Reported Speech', 'Inversion'],
-      15,
-      65
-    ),
-    grammarScoreTrend: generateLineData(pointCount, 72, 5),
-    challengePassRate: generateBarData(
-      ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
-      35,
-      90
-    ),
-    studentRetention: generateLineData(pointCount, 85, 8),
-    dailyActiveUsers: generateLineData(pointCount, 320, 40),
-    heatmap: generateHeatmapData(),
-  };
 }
+
+const EMPTY_DATA: AnalyticsData = {
+  studentGrowth: [],
+  lessonCompletion: [],
+  grammarErrors: [],
+  difficultLessons: [],
+  grammarScoreTrend: [],
+  challengePassRate: [],
+  studentRetention: [],
+  dailyActiveUsers: [],
+  heatmap: [],
+};
 
 // ─── Helper: Compute max custom date (365 days from start) ───────────────────
 
@@ -128,6 +53,16 @@ function getTodayISO(): string {
   return new Date().toISOString().split('T')[0];
 }
 
+function presetToRange(preset: PresetRange, customStart: string, customEnd: string): { start: string; end: string } {
+  const end = customEnd ? new Date(customEnd) : new Date();
+  if (preset === 'custom' && customStart && customEnd) {
+    return { start: new Date(customStart).toISOString(), end: end.toISOString() };
+  }
+  const days = preset === '7d' ? 7 : preset === '90d' ? 90 : 30;
+  const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
 // ─── Analytics Page Component ────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
@@ -136,46 +71,47 @@ export default function AnalyticsPage() {
     customStart: '',
     customEnd: '',
   });
-  const [loading, setLoading] = useState(false);
-  const [chartData, setChartData] = useState(() => getChartData('30d'));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<AnalyticsData>(EMPTY_DATA);
 
-  // Simulate loading delay when filter changes
-  const applyFilter = useCallback((preset: PresetRange) => {
+  const applyFilter = useCallback((preset: PresetRange, customStart: string, customEnd: string) => {
     setLoading(true);
-    // Simulate 1-2s delay for data fetching
-    const delay = 1000 + Math.random() * 1000;
-    setTimeout(() => {
-      setChartData(getChartData(preset));
-      setLoading(false);
-    }, delay);
+    setError(null);
+    const { start, end } = presetToRange(preset, customStart, customEnd);
+
+    fetch(`/api/admin/analytics?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.error) {
+          setError(json.error);
+          return;
+        }
+        setChartData({ ...EMPTY_DATA, ...json.data });
+      })
+      .catch(() => setError('Failed to load analytics data'))
+      .finally(() => setLoading(false));
   }, []);
 
   const handlePresetChange = (preset: PresetRange) => {
     setDateRange((prev) => ({ ...prev, preset }));
     if (preset !== 'custom') {
-      applyFilter(preset);
+      applyFilter(preset, dateRange.customStart, dateRange.customEnd);
     }
   };
 
-  const handleCustomApply = () => {
-    if (dateRange.customStart && dateRange.customEnd) {
-      applyFilter('custom');
-    }
-  };
-
-  // Apply custom range when both dates are filled
+  // Load on mount, and whenever a custom range is completed
   useEffect(() => {
-    if (dateRange.preset === 'custom' && dateRange.customStart && dateRange.customEnd) {
-      // Validate max 365 days
+    if (dateRange.preset === 'custom') {
+      if (!dateRange.customStart || !dateRange.customEnd) return;
       const start = new Date(dateRange.customStart);
       const end = new Date(dateRange.customEnd);
       const diffDays = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
-      if (diffDays > 0 && diffDays <= 365) {
-        handleCustomApply();
-      }
+      if (diffDays <= 0 || diffDays > 365) return;
     }
+    applyFilter(dateRange.preset, dateRange.customStart, dateRange.customEnd);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange.customStart, dateRange.customEnd]);
+  }, [dateRange.preset, dateRange.customStart, dateRange.customEnd]);
 
   return (
     <div className="space-y-6">
@@ -186,6 +122,12 @@ export default function AnalyticsPage() {
           Monitor student performance, engagement, and learning patterns.
         </p>
       </div>
+
+      {error && (
+        <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      )}
 
       {/* Date Range Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -255,10 +197,11 @@ export default function AnalyticsPage() {
 
         {/* Lesson Completion Rate - Bar Chart */}
         <ChartCard
-          title="Lesson Completion Rate"
+          title="Lesson Completion Rate by CEFR Level"
           chartType="bar"
           data={chartData.lessonCompletion}
           loading={loading}
+          emptyMessage="No lesson progress recorded yet for this range."
         />
 
         {/* Grammar Error Distribution - Pie Chart */}
@@ -267,14 +210,16 @@ export default function AnalyticsPage() {
           chartType="pie"
           data={chartData.grammarErrors}
           loading={loading}
+          emptyMessage="No incorrect exercise attempts recorded yet for this range."
         />
 
         {/* Most Difficult Lessons - Bar Chart */}
         <ChartCard
-          title="Most Difficult Lessons"
+          title="Lessons Where Students Get Stuck"
           chartType="bar"
           data={chartData.difficultLessons}
           loading={loading}
+          emptyMessage="Not enough attempts yet to identify difficult lessons."
         />
 
         {/* Average Grammar Score Trend - Line Chart */}
@@ -287,13 +232,14 @@ export default function AnalyticsPage() {
 
         {/* Challenge Pass Rate - Bar Chart */}
         <ChartCard
-          title="Challenge Pass Rate"
+          title="Challenge Pass Rate by Target Level"
           chartType="bar"
           data={chartData.challengePassRate}
           loading={loading}
+          emptyMessage="No placement challenge attempts recorded yet for this range."
         />
 
-        {/* Student Retention - Area Chart (cohort) */}
+        {/* Student Retention - Area Chart */}
         <ChartCard
           title="Student Retention"
           chartType="area"
@@ -316,12 +262,10 @@ export default function AnalyticsPage() {
             chartType="heatmap"
             data={chartData.heatmap}
             loading={loading}
+            emptyMessage="No activity recorded yet for this range."
           />
         </div>
       </div>
-
-      {/* AI-Powered Insights Section */}
-      <AIInsightsSection />
     </div>
   );
 }

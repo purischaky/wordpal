@@ -19,6 +19,7 @@ const CATEGORY_COLORS: Record<BlockCategory, { bg: string; border: string; text:
   place: { bg: 'bg-pink-100 dark:bg-pink-900/30', border: 'border-pink-300 dark:border-pink-700', text: 'text-pink-800 dark:text-pink-200', badge: 'bg-pink-500' },
   connector: { bg: 'bg-teal-100 dark:bg-teal-900/30', border: 'border-teal-300 dark:border-teal-700', text: 'text-teal-800 dark:text-teal-200', badge: 'bg-teal-500' },
   modifier: { bg: 'bg-amber-100 dark:bg-amber-900/30', border: 'border-amber-300 dark:border-amber-700', text: 'text-amber-800 dark:text-amber-200', badge: 'bg-amber-500' },
+  contrast: { bg: 'bg-rose-100 dark:bg-rose-900/30', border: 'border-rose-300 dark:border-rose-700', text: 'text-rose-800 dark:text-rose-200', badge: 'bg-rose-500' },
 };
 
 const CATEGORY_LABELS: Record<BlockCategory, string> = {
@@ -29,9 +30,10 @@ const CATEGORY_LABELS: Record<BlockCategory, string> = {
   place: 'Place',
   connector: 'Connector',
   modifier: 'Modifier',
+  contrast: 'Contrast',
 };
 
-const ALL_CATEGORIES: BlockCategory[] = ['subject', 'verb', 'object', 'time', 'place', 'connector', 'modifier'];
+const ALL_CATEGORIES: BlockCategory[] = ['subject', 'verb', 'object', 'time', 'place', 'connector', 'modifier', 'contrast'];
 
 export default function GrammarBlockEditor({
   blocks,
@@ -43,6 +45,8 @@ export default function GrammarBlockEditor({
   const [newBlockCategory, setNewBlockCategory] = useState<BlockCategory>('subject');
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [editingLabel, setEditingLabel] = useState('');
 
   const canAdd = blocks.length < maxBlocks;
   const canRemove = blocks.length > minBlocks;
@@ -74,6 +78,23 @@ export default function GrammarBlockEditor({
       )
     );
   }, [blocks, onChange]);
+
+  const startEditingLabel = useCallback((block: GrammarBlock) => {
+    setEditingBlockId(block.id);
+    setEditingLabel(block.label);
+  }, []);
+
+  const commitEditingLabel = useCallback(() => {
+    const trimmed = editingLabel.trim();
+    if (editingBlockId && trimmed) {
+      onChange(blocks.map((b) => (b.id === editingBlockId ? { ...b, label: trimmed } : b)));
+    }
+    setEditingBlockId(null);
+  }, [editingBlockId, editingLabel, blocks, onChange]);
+
+  const cancelEditingLabel = useCallback(() => {
+    setEditingBlockId(null);
+  }, []);
 
   const handleDragStart = (index: number) => {
     setDragIndex(index);
@@ -270,10 +291,37 @@ export default function GrammarBlockEditor({
                   {/* Color Indicator */}
                   <span className={`w-3 h-3 rounded-full flex-shrink-0 ${colors.badge}`} />
 
-                  {/* Label */}
-                  <span className={`flex-1 text-sm font-medium ${colors.text}`}>
-                    {block.label}
-                  </span>
+                  {/* Label (click to edit) */}
+                  {editingBlockId === block.id ? (
+                    <input
+                      type="text"
+                      value={editingLabel}
+                      onChange={(e) => setEditingLabel(e.target.value)}
+                      onBlur={commitEditingLabel}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          commitEditingLabel();
+                        } else if (e.key === 'Escape') {
+                          cancelEditingLabel();
+                        }
+                      }}
+                      autoFocus
+                      maxLength={100}
+                      className="flex-1 rounded-md border border-blue-400 bg-white px-2 py-0.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
+                      aria-label={`Edit label for block: ${block.label}`}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => startEditingLabel(block)}
+                      className={`flex-1 truncate rounded px-1 text-left text-sm font-medium ${colors.text} hover:bg-black/5 dark:hover:bg-white/10`}
+                      aria-label={`Edit label: ${block.label}`}
+                      title="Click to edit"
+                    >
+                      {block.label}
+                    </button>
+                  )}
 
                   {/* Category Badge */}
                   <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${colors.bg} ${colors.text} border ${colors.border}`}>

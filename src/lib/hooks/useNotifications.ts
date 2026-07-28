@@ -15,12 +15,8 @@ export function getDefaultContextUrl(type: AdminNotification['type']): string {
       return '/admin/students';
     case 'challenge_completion':
       return '/admin/challenges';
-    case 'ai_generation':
-      return '/admin/ai-studio';
     case 'system_error':
       return '/admin/settings';
-    case 'ai_insight':
-      return '/admin/analytics';
     default:
       return '/admin';
   }

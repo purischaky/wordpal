@@ -21,6 +21,12 @@ export function validateLearningPathCreate(body: unknown): ValidationResult {
     errors.push('title must not exceed 150 characters');
   }
 
+  // targetLevel — required CEFR level
+  const cefrLevels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  if (!data.targetLevel || !cefrLevels.includes(data.targetLevel as string)) {
+    errors.push('targetLevel is required and must be one of A1, A2, B1, B2, C1, C2');
+  }
+
   // description — optional, max 500 chars
   if (data.description !== undefined) {
     if (typeof data.description !== 'string') {

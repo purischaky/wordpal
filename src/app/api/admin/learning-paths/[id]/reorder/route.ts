@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
-import { readJsonFile, writeJsonFile } from '@/lib/api/file-service';
-import { successResponse, errorResponse } from '@/lib/api/response';
+import { successResponse, errorResponse, renameKey } from '@/lib/api/response';
+import { requireAdminSection } from '@/lib/api/guard';
+import { createSupabaseServerClient } from '@/lib/services/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,49 +9,54 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const guard = await requireAdminSection('learning-paths');
+  if (!guard.ok) return guard.response;
+
+  const { id } = await params;
+  let body: unknown;
   try {
-    const { id } = await params;
-    const body = await request.json();
-
-    const { unitIds } = body as { unitIds: string[] };
-
-    if (!Array.isArray(unitIds)) {
-      return errorResponse('unitIds must be an array', 400);
-    }
-
-    const learningPaths = await readJsonFile<Record<string, unknown>[]>(
-      'learning-paths.json'
-    );
-    const index = learningPaths.findIndex((lp) => lp.id === id);
-
-    if (index === -1) {
-      return errorResponse('Learning path not found', 404);
-    }
-
-    const learningPath = learningPaths[index];
-    const units = (learningPath.units as Array<Record<string, unknown>>) || [];
-
-    // Reorder units based on the provided unitIds order
-    const reorderedUnits: Record<string, unknown>[] = [];
-    for (let i = 0; i < unitIds.length; i++) {
-      const unit = units.find((u) => u.id === unitIds[i]);
-      if (unit) {
-        reorderedUnits.push({ ...unit, order: i + 1 });
-      }
-    }
-
-    learningPaths[index] = {
-      ...learningPath,
-      units: reorderedUnits,
-      updatedAt: new Date().toISOString(),
-    };
-    await writeJsonFile('learning-paths.json', learningPaths);
-
-    return successResponse(learningPaths[index]);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      return errorResponse('Invalid JSON in request body', 400);
-    }
-    return errorResponse('Failed to reorder learning path units');
+    body = await request.json();
+  } catch {
+    return errorResponse('Invalid JSON in request body', 400);
   }
+
+  const { unitIds } = body as { unitIds?: unknown };
+  if (!Array.isArray(unitIds) || !unitIds.every((u) => typeof u === 'string')) {
+    return errorResponse('unitIds must be an array of strings', 400);
+  }
+
+  const supabase = await createSupabaseServerClient();
+
+  const { data: units, error: readError } = await supabase
+    .from('units')
+    .select('id')
+    .eq('learning_path_id', id);
+  if (readError) return errorResponse('Failed to read units');
+
+  const validIds = new Set((units ?? []).map((u) => u.id));
+  const orderedIds = unitIds.filter((unitId) => validIds.has(unitId));
+
+  // Two passes avoid transient collisions with the (learning_path_id, position)
+  // unique constraint while reassigning positions in place.
+  for (let i = 0; i < orderedIds.length; i++) {
+    await supabase
+      .from('units')
+      .update({ position: -(i + 1) })
+      .eq('id', orderedIds[i]);
+  }
+  for (let i = 0; i < orderedIds.length; i++) {
+    await supabase
+      .from('units')
+      .update({ position: i + 1 })
+      .eq('id', orderedIds[i]);
+  }
+
+  const { data: reordered, error } = await supabase
+    .from('units')
+    .select('*')
+    .eq('learning_path_id', id)
+    .order('position');
+  if (error) return errorResponse('Failed to reorder learning path units');
+
+  return successResponse(renameKey(reordered, 'position', 'order'));
 }

@@ -9,21 +9,10 @@ export type {
   Exercise,
   Lesson,
   CanvasState,
-  FeedbackStatus,
-  ExerciseState,
-  ExerciseAction,
   DraggableBlockProps,
 } from './exercise';
 
 export { GRAMMAR_EXPLANATIONS } from './exercise';
-
-export type {
-  FeedbackResponse,
-  FeedbackRequest,
-  HintRequest,
-  HintResponse,
-  FeedbackPanelProps,
-} from './feedback';
 
 export type {
   ProgressUpdateRequest,
@@ -40,7 +29,6 @@ export type {
   LearningPathStatus,
   LessonStatus,
   ExerciseType,
-  BlockCategory as AdminBlockCategory,
   AdminUser,
   LearningPath,
   Unit,
@@ -58,7 +46,6 @@ export type {
   KPIMetric,
   ChartDataPoint,
   AdminNotification,
-  AIInsight,
   PlatformSettings,
   AdminSection,
 } from './admin';

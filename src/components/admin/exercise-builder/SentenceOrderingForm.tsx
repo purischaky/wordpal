@@ -15,6 +15,8 @@ export default function SentenceOrderingForm({ initialData, onChange }: Sentence
   const [fragments, setFragments] = useState<string[]>(
     initialData?.fragments?.length ? initialData.fragments : ['', '']
   );
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const emitChange = useCallback(
     (frags: string[]) => {
@@ -50,20 +52,43 @@ export default function SentenceOrderingForm({ initialData, onChange }: Sentence
     emitChange(updated);
   };
 
-  const moveFragment = (index: number, direction: 'up' | 'down') => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= fragments.length) return;
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === dropIndex) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
     const updated = [...fragments];
-    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    const [moved] = updated.splice(dragIndex, 1);
+    updated.splice(dropIndex, 0, moved);
+
     setFragments(updated);
     emitChange(updated);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
   };
 
   return (
     <div className="space-y-5">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Sentence Ordering</h2>
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        Enter sentence fragments in the correct order. Students will see them shuffled and must rearrange them.
+        Enter sentence fragments in the correct order, then drag to rearrange. Students will see them shuffled and must rearrange them.
       </p>
 
       {/* Fragments */}
@@ -76,62 +101,60 @@ export default function SentenceOrderingForm({ initialData, onChange }: Sentence
             {fragments.length}/{MAX_FRAGMENTS}
           </span>
         </div>
-        <div className="space-y-2">
-          {fragments.map((fragment, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <span className="text-xs font-medium text-gray-400 dark:text-gray-500 w-6 text-center shrink-0">
-                {index + 1}
-              </span>
-              <input
-                type="text"
-                value={fragment}
-                onChange={(e) => handleFragmentChange(index, e.target.value)}
-                maxLength={200}
-                placeholder={`Fragment ${index + 1}`}
-                aria-label={`Fragment ${index + 1}`}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              />
-              <span className="text-xs text-gray-400 dark:text-gray-500 w-12 text-right shrink-0">
-                {fragment.length}/200
-              </span>
-              {/* Move up */}
-              <button
-                type="button"
-                onClick={() => moveFragment(index, 'up')}
-                disabled={index === 0}
-                aria-label={`Move fragment ${index + 1} up`}
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        <div className="space-y-2" role="list" aria-label="Sentence fragments">
+          {fragments.map((fragment, index) => {
+            const isDragging = dragIndex === index;
+            const isDragOver = dragOverIndex === index;
+            return (
+              <div
+                key={index}
+                role="listitem"
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`flex items-center gap-2 rounded-xl border p-1 transition-all duration-200 ${
+                  isDragging ? 'opacity-50 scale-95' : ''
+                } ${isDragOver ? 'ring-2 ring-blue-400' : 'border-transparent'}`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                </svg>
-              </button>
-              {/* Move down */}
-              <button
-                type="button"
-                onClick={() => moveFragment(index, 'down')}
-                disabled={index === fragments.length - 1}
-                aria-label={`Move fragment ${index + 1} down`}
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {/* Remove */}
-              <button
-                type="button"
-                onClick={() => removeFragment(index)}
-                disabled={fragments.length <= MIN_FRAGMENTS}
-                aria-label={`Remove fragment ${index + 1}`}
-                className="p-1.5 text-red-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          ))}
+                {/* Drag handle */}
+                <span
+                  className="cursor-grab active:cursor-grabbing px-1 text-gray-400 dark:text-gray-500 select-none"
+                  aria-label={`Drag to reorder fragment ${index + 1}`}
+                >
+                  ⠿
+                </span>
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500 w-6 text-center shrink-0">
+                  {index + 1}
+                </span>
+                <input
+                  type="text"
+                  value={fragment}
+                  onChange={(e) => handleFragmentChange(index, e.target.value)}
+                  maxLength={200}
+                  placeholder={`Fragment ${index + 1}`}
+                  aria-label={`Fragment ${index + 1}`}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                />
+                <span className="text-xs text-gray-400 dark:text-gray-500 w-12 text-right shrink-0">
+                  {fragment.length}/200
+                </span>
+                {/* Remove */}
+                <button
+                  type="button"
+                  onClick={() => removeFragment(index)}
+                  disabled={fragments.length <= MIN_FRAGMENTS}
+                  aria-label={`Remove fragment ${index + 1}`}
+                  className="p-1.5 text-red-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
 

@@ -24,11 +24,17 @@ type ExerciseFormContent =
   | RewriteSentenceContent
   | FreeWritingContent;
 
+export interface ExerciseBuilderData {
+  type: ExerciseType;
+  blocks?: GrammarBlock[];
+  content?: ExerciseFormContent;
+}
+
 export interface ExerciseBuilderProps {
   initialType?: ExerciseType;
   initialBlocks?: GrammarBlock[];
-  onSave?: (data: { type: ExerciseType; blocks?: GrammarBlock[]; content?: ExerciseFormContent }) => Promise<void>;
-  onPreview?: () => void;
+  onSave?: (data: ExerciseBuilderData) => Promise<void>;
+  onPreview?: (data: ExerciseBuilderData) => void;
 }
 
 const EXERCISE_TYPES: { value: ExerciseType; label: string; description: string }[] = [
@@ -55,6 +61,12 @@ export default function ExerciseBuilder({
   const handleFormChange = (data: ExerciseFormContent) => {
     formContentRef.current = data;
   };
+
+  const currentData = (): ExerciseBuilderData => ({
+    type: exerciseType,
+    blocks: exerciseType === 'drag-and-drop' ? blocks : undefined,
+    content: exerciseType !== 'drag-and-drop' ? formContentRef.current ?? undefined : undefined,
+  });
 
   return (
     <div className="space-y-6">
@@ -117,7 +129,7 @@ export default function ExerciseBuilder({
         {onPreview && (
           <button
             type="button"
-            onClick={onPreview}
+            onClick={() => onPreview(currentData())}
             className="px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Preview
@@ -126,11 +138,7 @@ export default function ExerciseBuilder({
         {onSave && (
           <button
             type="button"
-            onClick={() => onSave({
-              type: exerciseType,
-              blocks: exerciseType === 'drag-and-drop' ? blocks : undefined,
-              content: exerciseType !== 'drag-and-drop' ? formContentRef.current ?? undefined : undefined,
-            })}
+            onClick={() => onSave(currentData())}
             className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
           >
             Save Exercise

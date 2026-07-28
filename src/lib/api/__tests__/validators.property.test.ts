@@ -58,12 +58,15 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
     'exercises_completed',
   );
 
+  /** Valid CEFR target level */
+  const validTargetLevel = fc.constantFrom('A1', 'A2', 'B1', 'B2', 'C1', 'C2');
+
   // --- Learning Path Create ---
 
   it('validateLearningPathCreate accepts valid payloads with only required fields', () => {
     fc.assert(
-      fc.property(validTitle150, (title) => {
-        const result = validateLearningPathCreate({ title });
+      fc.property(validTitle150, validTargetLevel, (title, targetLevel) => {
+        const result = validateLearningPathCreate({ title, targetLevel });
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
       }),
@@ -75,10 +78,11 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
     fc.assert(
       fc.property(
         validTitle150,
+        validTargetLevel,
         validDescription500,
         validEstimatedDuration,
-        (title, description, estimatedDuration) => {
-          const result = validateLearningPathCreate({ title, description, estimatedDuration });
+        (title, targetLevel, description, estimatedDuration) => {
+          const result = validateLearningPathCreate({ title, targetLevel, description, estimatedDuration });
           expect(result.valid).toBe(true);
           expect(result.errors).toHaveLength(0);
         },
@@ -91,8 +95,8 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
 
   it('validateLessonCreate accepts valid payloads with only required fields', () => {
     fc.assert(
-      fc.property(validTitle150, (title) => {
-        const result = validateLessonCreate({ title });
+      fc.property(validTitle150, fc.integer({ min: 1, max: 999 }), (title, position) => {
+        const result = validateLessonCreate({ title, unitId: 'unit-1', position });
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
       }),
@@ -106,10 +110,11 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
     fc.assert(
       fc.property(
         validTitle150,
+        fc.integer({ min: 1, max: 999 }),
         validDescription500,
         validGrammarFocus,
-        (title, description, grammarFocus) => {
-          const result = validateLessonCreate({ title, description, grammarFocus });
+        (title, position, description, grammarFocus) => {
+          const result = validateLessonCreate({ title, unitId: 'unit-1', position, description, grammarFocus });
           expect(result.valid).toBe(true);
           expect(result.errors).toHaveLength(0);
         },
@@ -122,8 +127,13 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
 
   it('validateExerciseCreate accepts valid payloads with a valid exercise type', () => {
     fc.assert(
-      fc.property(validExerciseType, (type) => {
-        const result = validateExerciseCreate({ type });
+      fc.property(validExerciseType, fc.integer({ min: 1, max: 999 }), (type, position) => {
+        const result = validateExerciseCreate({
+          type,
+          position,
+          content: { targetSentence: 'x', blocks: [] },
+          lessonId: 'lesson-1',
+        });
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
       }),
@@ -135,11 +145,16 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
 
   it('validateAchievementCreate accepts valid payloads with only required fields', () => {
     fc.assert(
-      fc.property(validTitle100, validTriggerCriteria, (title, triggerCriteria) => {
-        const result = validateAchievementCreate({ title, triggerCriteria });
-        expect(result.valid).toBe(true);
-        expect(result.errors).toHaveLength(0);
-      }),
+      fc.property(
+        validTitle100,
+        validTriggerCriteria,
+        fc.integer({ min: 1, max: 10000 }),
+        (title, triggerCriteria, thresholdValue) => {
+          const result = validateAchievementCreate({ title, triggerCriteria, thresholdValue });
+          expect(result.valid).toBe(true);
+          expect(result.errors).toHaveLength(0);
+        },
+      ),
       { numRuns: 100 },
     );
   });
@@ -149,9 +164,10 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
       fc.property(
         validTitle100,
         validTriggerCriteria,
+        fc.integer({ min: 1, max: 10000 }),
         validDescription300,
-        (title, triggerCriteria, description) => {
-          const result = validateAchievementCreate({ title, triggerCriteria, description });
+        (title, triggerCriteria, thresholdValue, description) => {
+          const result = validateAchievementCreate({ title, triggerCriteria, thresholdValue, description });
           expect(result.valid).toBe(true);
           expect(result.errors).toHaveLength(0);
         },
@@ -164,8 +180,8 @@ describe('Feature: admin-api-routes, Property 4: Validation Accepts Valid Input'
 
   it('validateChallengeCreate accepts valid payloads with a valid title', () => {
     fc.assert(
-      fc.property(validTitle150, (title) => {
-        const result = validateChallengeCreate({ title });
+      fc.property(validTitle150, validTargetLevel, (title, targetLevel) => {
+        const result = validateChallengeCreate({ title, targetLevel });
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
       }),
@@ -318,7 +334,7 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
           fc.oneof(
             fc.integer({ min: 10000, max: 999999 }),
             fc.integer({ min: -9999, max: 0 }),
-          ).map((duration) => ({ title: 'Valid Title', estimatedDuration: duration })),
+          ).map((duration) => ({ title: 'Valid Title', targetLevel: 'A1', estimatedDuration: duration })),
           (body) => {
             const result = validateLearningPathCreate(body);
             expect(result.valid).toBe(false);
@@ -334,6 +350,7 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
         fc.property(
           fc.string({ minLength: 501, maxLength: 700 }).map((desc) => ({
             title: 'Valid Title',
+            targetLevel: 'A1',
             description: desc,
           })),
           (body) => {
@@ -342,6 +359,17 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
             expect(result.errors.length).toBeGreaterThan(0);
           },
         ),
+        { numRuns: 100 },
+      );
+    });
+
+    it('rejects missing targetLevel', () => {
+      fc.assert(
+        fc.property(fc.constant({ title: 'Valid Title' }), (body) => {
+          const result = validateLearningPathCreate(body);
+          expect(result.valid).toBe(false);
+          expect(result.errors.length).toBeGreaterThan(0);
+        }),
         { numRuns: 100 },
       );
     });
@@ -779,10 +807,10 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
       );
     });
 
-    it('rejects name exceeding 100 characters', () => {
+    it('rejects displayName exceeding 100 characters', () => {
       fc.assert(
         fc.property(
-          fc.string({ minLength: 101, maxLength: 300 }).map((name) => ({ name })),
+          fc.string({ minLength: 101, maxLength: 300 }).map((displayName) => ({ displayName })),
           (body) => {
             const result = validateStudentUpdate(body);
             expect(result.valid).toBe(false);
@@ -793,9 +821,9 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
       );
     });
 
-    it('rejects empty name string', () => {
+    it('rejects empty displayName string', () => {
       fc.assert(
-        fc.property(fc.constant({ name: '' }), (body) => {
+        fc.property(fc.constant({ displayName: '' }), (body) => {
           const result = validateStudentUpdate(body);
           expect(result.valid).toBe(false);
           expect(result.errors.length).toBeGreaterThan(0);
@@ -804,10 +832,10 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
       );
     });
 
-    it('rejects wrong type for name (number instead of string)', () => {
+    it('rejects wrong type for displayName (number instead of string)', () => {
       fc.assert(
         fc.property(
-          fc.oneof(fc.integer(), fc.boolean()).map((name) => ({ name })),
+          fc.oneof(fc.integer(), fc.boolean()).map((displayName) => ({ displayName })),
           (body) => {
             const result = validateStudentUpdate(body);
             expect(result.valid).toBe(false);
@@ -818,9 +846,13 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
       );
     });
 
-    it('rejects empty email string', () => {
+    it('rejects invalid cefrLevel value', () => {
+      const invalidCefr = fc
+        .string({ minLength: 1, maxLength: 10 })
+        .filter((s) => !['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].includes(s));
+
       fc.assert(
-        fc.property(fc.constant({ email: '' }), (body) => {
+        fc.property(invalidCefr.map((cefrLevel) => ({ cefrLevel })), (body) => {
           const result = validateStudentUpdate(body);
           expect(result.valid).toBe(false);
           expect(result.errors.length).toBeGreaterThan(0);
@@ -829,16 +861,17 @@ describe('Feature: admin-api-routes, Property 3: Validation Rejects Invalid Inpu
       );
     });
 
-    it('rejects wrong type for email', () => {
+    it('rejects invalid role value', () => {
+      const invalidRole = fc
+        .string({ minLength: 1, maxLength: 30 })
+        .filter((s) => !['admin', 'instructor', 'content_creator', 'student'].includes(s));
+
       fc.assert(
-        fc.property(
-          fc.oneof(fc.integer(), fc.boolean()).map((email) => ({ email })),
-          (body) => {
-            const result = validateStudentUpdate(body);
-            expect(result.valid).toBe(false);
-            expect(result.errors.length).toBeGreaterThan(0);
-          },
-        ),
+        fc.property(invalidRole.map((role) => ({ role })), (body) => {
+          const result = validateStudentUpdate(body);
+          expect(result.valid).toBe(false);
+          expect(result.errors.length).toBeGreaterThan(0);
+        }),
         { numRuns: 100 },
       );
     });

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { PlatformSettings, ExerciseType } from '@/types/admin';
+import { SectionInDevelopment } from '@/components/admin/design-system/SectionInDevelopment';
 
 // ─── Default Settings ────────────────────────────────────────────────────────
 
@@ -11,7 +12,6 @@ const DEFAULT_SETTINGS: PlatformSettings = {
     themeColors: { primary: '#6366f1', secondary: '#8b5cf6', accent: '#06b6d4' },
     language: 'en',
   },
-  aiModel: 'bedrock-claude-3',
   scoring: {
     xpPerExercise: 10,
     xpPerLesson: 100,
@@ -32,13 +32,6 @@ const DEFAULT_SETTINGS: PlatformSettings = {
   },
 };
 
-const AI_MODELS = [
-  { value: 'bedrock-claude-3', label: 'Claude 3 (AWS Bedrock)' },
-  { value: 'bedrock-claude-3-haiku', label: 'Claude 3 Haiku (AWS Bedrock)' },
-  { value: 'bedrock-claude-3-sonnet', label: 'Claude 3 Sonnet (AWS Bedrock)' },
-  { value: 'bedrock-titan', label: 'Amazon Titan' },
-];
-
 const LANGUAGES = [
   { value: 'en', label: 'English' },
   { value: 'es', label: 'Spanish' },
@@ -56,7 +49,7 @@ const EXERCISE_TYPE_LABELS: Record<ExerciseType, string> = {
   'free-writing': 'Free Writing',
 };
 
-type SettingsTab = 'brand' | 'ai-model' | 'cefr' | 'scoring' | 'roles' | 'notifications';
+type SettingsTab = 'brand' | 'cefr' | 'scoring' | 'roles' | 'notifications';
 
 // ─── Validation Types ────────────────────────────────────────────────────────
 
@@ -247,7 +240,6 @@ export default function SettingsPage() {
 
   const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
     { id: 'brand', label: 'Brand', icon: <PaintIcon /> },
-    { id: 'ai-model', label: 'AI Model', icon: <BrainIcon /> },
     { id: 'cefr', label: 'CEFR Config', icon: <BookIcon /> },
     { id: 'scoring', label: 'Scoring Rules', icon: <StarIcon /> },
     { id: 'roles', label: 'Roles', icon: <ShieldIcon /> },
@@ -261,7 +253,7 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Platform Settings</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Configure branding, AI behavior, scoring rules, and notification preferences.
+            Configure branding, scoring rules, and notification preferences.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -355,9 +347,6 @@ export default function SettingsPage() {
       <div role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={activeTab}>
         {activeTab === 'brand' && (
           <BrandPanel settings={settings} errors={errors} onChange={setSettings} />
-        )}
-        {activeTab === 'ai-model' && (
-          <AIModelPanel settings={settings} onChange={setSettings} />
         )}
         {activeTab === 'cefr' && (
           <CEFRPanel />
@@ -655,70 +644,10 @@ function ColorInput({ label, value, onChange, error, id }: {
   );
 }
 
-// ─── AI Model Panel ──────────────────────────────────────────────────────────
-
-function AIModelPanel({ settings, onChange }: Omit<PanelProps, 'errors'>) {
-  return (
-    <div className="max-w-2xl">
-      <div className="rounded-xl border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
-        <h3 className="text-lg font-semibold text-foreground">AI Model Configuration</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Select the AI model used for content generation and student assessments.
-        </p>
-
-        <div className="mt-6">
-          <label htmlFor="ai-model-select" className="block text-sm font-medium text-foreground">
-            Active Model
-          </label>
-          <select
-            id="ai-model-select"
-            value={settings.aiModel}
-            onChange={(e) => onChange({ ...settings, aiModel: e.target.value })}
-            className="mt-1.5 w-full rounded-[12px] border border-input bg-background px-3 py-2.5 text-sm text-foreground shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            {AI_MODELS.map((model) => (
-              <option key={model.value} value={model.value}>{model.label}</option>
-            ))}
-          </select>
-          <p className="mt-2 text-xs text-muted-foreground">
-            This model will be used for AI Content Studio generation and AI-powered insights.
-          </p>
-        </div>
-
-        <div className="mt-6 rounded-lg border border-border bg-muted/50 p-4">
-          <h4 className="text-sm font-medium text-foreground">Model Details</h4>
-          <dl className="mt-3 space-y-2 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Provider</dt>
-              <dd className="font-medium text-foreground">AWS Bedrock</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Max Tokens</dt>
-              <dd className="font-medium text-foreground">4,096</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Timeout</dt>
-              <dd className="font-medium text-foreground">30 seconds</dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── CEFR Configuration Panel ────────────────────────────────────────────────
 
 function CEFRPanel() {
-  const levels = [
-    { level: 'A1', label: 'Beginner', description: 'Can understand and use familiar everyday expressions' },
-    { level: 'A2', label: 'Elementary', description: 'Can communicate in simple and routine tasks' },
-    { level: 'B1', label: 'Intermediate', description: 'Can deal with most situations likely to arise' },
-    { level: 'B2', label: 'Upper Intermediate', description: 'Can interact with a degree of fluency' },
-    { level: 'C1', label: 'Advanced', description: 'Can produce clear, well-structured, detailed text' },
-    { level: 'C2', label: 'Proficiency', description: 'Can understand virtually everything heard or read' },
-  ];
-
   return (
     <div className="max-w-2xl">
       <div className="rounded-xl border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
@@ -727,23 +656,11 @@ function CEFRPanel() {
           Configure Common European Framework of Reference levels for the platform.
         </p>
 
-        <div className="mt-6 space-y-3">
-          {levels.map((item) => (
-            <div key={item.level} className="flex items-center justify-between rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/50">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
-                  {item.level}
-                </span>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
-                </div>
-              </div>
-              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                Active
-              </span>
-            </div>
-          ))}
+        <div className="mt-6">
+          <SectionInDevelopment
+            title="CEFR level configuration"
+            description="Per-level toggles and descriptions aren't wired up yet — the six levels (A1–C2) are currently fixed across the platform."
+          />
         </div>
       </div>
     </div>
@@ -930,20 +847,20 @@ function RolesPanel() {
   const roles = [
     {
       role: 'Administrator',
-      description: 'Full platform access including settings, roles, and AI configuration',
-      sections: ['Dashboard', 'Students', 'Learning Paths', 'Lessons', 'Exercises', 'AI Studio', 'Challenges', 'Analytics', 'Achievements', 'Settings', 'Profile'],
+      description: 'Full platform access including settings and role management',
+      sections: ['Dashboard', 'Students', 'Learning Paths', 'Lessons', 'Challenges', 'Analytics', 'Achievements', 'Settings', 'Profile'],
       color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     },
     {
       role: 'Instructor',
-      description: 'Student management, content creation, AI tools, and analytics',
-      sections: ['Dashboard', 'Students', 'Learning Paths', 'Lessons', 'Exercises', 'AI Studio', 'Challenges', 'Analytics', 'Achievements', 'Profile'],
+      description: 'Student management, content creation, and analytics',
+      sections: ['Dashboard', 'Students', 'Learning Paths', 'Lessons', 'Challenges', 'Analytics', 'Achievements', 'Profile'],
       color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
     },
     {
       role: 'Content Creator',
-      description: 'Content creation for learning paths, lessons, and exercises',
-      sections: ['Dashboard', 'Learning Paths', 'Lessons', 'Exercises', 'AI Studio', 'Profile'],
+      description: 'Content creation for learning paths and lessons',
+      sections: ['Dashboard', 'Learning Paths', 'Lessons', 'Profile'],
       color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
     },
     {
@@ -959,7 +876,7 @@ function RolesPanel() {
       <div className="rounded-xl border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
         <h3 className="text-lg font-semibold text-foreground">Role Permissions</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          View and manage which sections each role can access.
+          Reference: which sections each role can access.
         </p>
 
         <div className="mt-6 space-y-4">
@@ -1097,13 +1014,6 @@ function PaintIcon() {
   );
 }
 
-function BrainIcon() {
-  return (
-    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-    </svg>
-  );
-}
 
 function BookIcon() {
   return (

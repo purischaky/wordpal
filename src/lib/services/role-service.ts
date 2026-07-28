@@ -49,7 +49,7 @@ export function hasPermission(role: UserRole, section: AdminSection): boolean {
  *   /admin -> 'dashboard'
  *   /admin/students -> 'students'
  *   /admin/learning-paths/new -> 'learning-paths'
- *   /admin/ai-studio -> 'ai-studio'
+ *   /admin/challenges -> 'challenges'
  */
 export function pathToAdminSection(pathname: string): AdminSection | null {
   // Remove trailing slash and normalize
@@ -73,7 +73,6 @@ export function pathToAdminSection(pathname: string): AdminSection | null {
     'units': 'units',
     'lessons': 'lessons',
     'exercises': 'exercises',
-    'ai-studio': 'ai-studio',
     'challenges': 'challenges',
     'analytics': 'analytics',
     'achievements': 'achievements',
@@ -119,10 +118,13 @@ export function checkRoleAccess(
     return { authorized: false, reason: 'student' };
   }
 
-  // If we couldn't determine the section (e.g., /admin/denied), allow through
-  // so that denied page and notifications can render
+  // Unmapped section (e.g. an unknown /admin/<segment>) -> deny access.
+  // The old behavior of allowing these through was a hole: any admin
+  // path the sectionMap didn't recognize was reachable by any non-student
+  // role, bypassing ROLE_PERMISSIONS entirely. /admin/denied is exempted
+  // by the caller (proxy.ts) before this function is ever invoked.
   if (section === null) {
-    return { authorized: true, role };
+    return { authorized: false, reason: 'insufficient_permissions' };
   }
 
   // Check section-level permissions
@@ -165,13 +167,33 @@ export class RoleVerificationTimeoutError extends Error {
 }
 
 /**
- * Fetches the user's role from a Supabase user metadata object.
- * New users default to 'student' role (Req 2.9).
+ * Reads the app role from a decoded Supabase JWT's claims.
+ *
+ * Deliberately reads `app_metadata.role`, NOT `user_metadata.role`:
+ * `user_metadata` is writable by the signed-in user via the client SDK
+ * (`supabase.auth.updateUser`), so trusting it there would let any
+ * student grant themselves 'admin' in one request. `app_metadata` can
+ * only be written by service_role — here, exclusively by the
+ * `sync_role_to_app_metadata` trigger in supabase/migrations/0001_roles.sql,
+ * driven by the `user_roles` table.
  */
-export function getUserRoleFromMetadata(
-  userMetadata: Record<string, unknown> | null | undefined,
+export function getRoleFromClaims(
+  claims: { app_metadata?: Record<string, unknown> } | null | undefined,
 ): string | null {
-  if (!userMetadata) return null;
-  const role = userMetadata.role as string | undefined;
+  if (!claims?.app_metadata) return null;
+  const role = claims.app_metadata.role as string | undefined;
+  return role ?? null;
+}
+
+/**
+ * Same lookup as getRoleFromClaims, but for callers that already have a
+ * plain `app_metadata` object in hand (e.g. `session.user.app_metadata`
+ * from supabase-js on the client) rather than a full decoded JWT.
+ */
+export function getRoleFromAppMetadata(
+  appMetadata: Record<string, unknown> | null | undefined,
+): string | null {
+  if (!appMetadata) return null;
+  const role = appMetadata.role as string | undefined;
   return role ?? null;
 }

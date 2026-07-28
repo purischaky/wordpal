@@ -29,6 +29,23 @@ export function validateExerciseCreate(body: unknown): ValidationResult {
     errors.push(`type must be one of: ${VALID_EXERCISE_TYPES.join(', ')}`);
   }
 
+  // content — required, must be an object (shape is further enforced by a DB check)
+  if (!data.content || typeof data.content !== 'object') {
+    errors.push('content is required and must be an object');
+  }
+
+  // position — required, positive integer
+  if (typeof data.position !== 'number' || data.position <= 0) {
+    errors.push('position is required and must be a positive number');
+  }
+
+  // exactly one of lessonId / challengeId must be present
+  const hasLesson = typeof data.lessonId === 'string' && data.lessonId.length > 0;
+  const hasChallenge = typeof data.challengeId === 'string' && data.challengeId.length > 0;
+  if (hasLesson === hasChallenge) {
+    errors.push('exactly one of lessonId or challengeId is required');
+  }
+
   return { valid: errors.length === 0, errors };
 }
 

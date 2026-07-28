@@ -1,46 +1,47 @@
 import type { NextRequest } from 'next/server';
-import { readJsonFile, writeJsonFile } from '@/lib/api/file-service';
-import {
-  successResponse,
-  errorResponse,
-  validationErrorResponse,
-} from '@/lib/api/response';
+import { successResponse, errorResponse, validationErrorResponse } from '@/lib/api/response';
 import { validateChallengePublish } from '@/lib/api/validators/challenges';
+import { requireAdminSection } from '@/lib/api/guard';
+import { createSupabaseServerClient } from '@/lib/services/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
 export async function PATCH(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
+  const guard = await requireAdminSection('challenges');
+  if (!guard.ok) return guard.response;
 
-    const challenges = await readJsonFile<Record<string, unknown>[]>(
-      'challenges.json'
-    );
-    const index = challenges.findIndex((c) => c.id === id);
+  const { id } = await params;
+  const supabase = await createSupabaseServerClient();
 
-    if (index === -1) {
-      return errorResponse('Challenge not found', 404);
-    }
+  const { data: challenge, error: readError } = await supabase
+    .from('placement_challenges')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (readError) return errorResponse('Failed to read challenge');
+  if (!challenge) return errorResponse('Challenge not found', 404);
 
-    const challenge = challenges[index];
-    const validation = validateChallengePublish(challenge);
+  const { data: questions, error: questionsError } = await supabase
+    .from('exercises')
+    .select('content')
+    .eq('challenge_id', id);
+  if (questionsError) return errorResponse('Failed to read challenge questions');
 
-    if (!validation.valid) {
-      return validationErrorResponse('Validation failed', validation.errors);
-    }
-
-    challenges[index] = {
-      ...challenge,
-      status: 'published',
-      updatedAt: new Date().toISOString(),
-    };
-    await writeJsonFile('challenges.json', challenges);
-
-    return successResponse(challenges[index]);
-  } catch (error) {
-    return errorResponse('Failed to publish challenge');
+  const validation = validateChallengePublish({ questions: questions ?? [] });
+  if (!validation.valid) {
+    return validationErrorResponse('Validation failed', validation.errors);
   }
+
+  const { data: updated, error } = await supabase
+    .from('placement_challenges')
+    .update({ status: 'published' })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) return errorResponse('Failed to publish challenge');
+  return successResponse(updated);
 }

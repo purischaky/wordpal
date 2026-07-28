@@ -1,34 +1,24 @@
 import type { NextRequest } from 'next/server';
-import { readJsonFile, writeJsonFile } from '@/lib/api/file-service';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import { requireAdminSection } from '@/lib/api/guard';
+import { createSupabaseServerClient } from '@/lib/services/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
-interface Notification {
-  id: string;
-  isRead: boolean;
-  createdAt: string;
-  [key: string]: unknown;
-}
-
 export async function PATCH(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
-    const notifications = await readJsonFile<Notification[]>('notifications.json');
-    const index = notifications.findIndex((n) => n.id === id);
+  const guard = await requireAdminSection('dashboard');
+  if (!guard.ok) return guard.response;
 
-    if (index === -1) {
-      return errorResponse('Notification not found', 404);
-    }
+  const { id } = await params;
+  const supabase = await createSupabaseServerClient();
 
-    notifications[index] = { ...notifications[index], isRead: true };
-    await writeJsonFile('notifications.json', notifications);
+  const { error } = await supabase
+    .from('notification_reads')
+    .upsert({ notification_id: id, user_id: guard.session.userId }, { onConflict: 'notification_id,user_id' });
+  if (error) return errorResponse('Failed to update notification');
 
-    return successResponse(notifications[index]);
-  } catch (error) {
-    return errorResponse('Failed to update notification');
-  }
+  return successResponse({ id, isRead: true });
 }

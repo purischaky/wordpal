@@ -1,24 +1,30 @@
-import type { NextRequest } from 'next/server';
-import { readJsonFile, writeJsonFile } from '@/lib/api/file-service';
 import { successResponse, errorResponse } from '@/lib/api/response';
+import { requireAdminSection } from '@/lib/api/guard';
+import { createSupabaseServerClient } from '@/lib/services/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
-interface Notification {
-  id: string;
-  isRead: boolean;
-  createdAt: string;
-  [key: string]: unknown;
-}
+export async function POST() {
+  const guard = await requireAdminSection('dashboard');
+  if (!guard.ok) return guard.response;
 
-export async function POST(request: NextRequest) {
-  try {
-    const notifications = await readJsonFile<Notification[]>('notifications.json');
-    const updated = notifications.map((n) => ({ ...n, isRead: true }));
-    await writeJsonFile('notifications.json', updated);
+  const supabase = await createSupabaseServerClient();
 
-    return successResponse(updated);
-  } catch (error) {
-    return errorResponse('Failed to mark notifications as read');
+  const { data: notifications, error: readError } = await supabase
+    .from('notifications')
+    .select('id');
+  if (readError) return errorResponse('Failed to mark notifications as read');
+
+  const rows = (notifications ?? []).map((n) => ({
+    notification_id: n.id,
+    user_id: guard.session.userId,
+  }));
+  if (rows.length > 0) {
+    const { error } = await supabase
+      .from('notification_reads')
+      .upsert(rows, { onConflict: 'notification_id,user_id' });
+    if (error) return errorResponse('Failed to mark notifications as read');
   }
+
+  return successResponse({ markedCount: rows.length });
 }

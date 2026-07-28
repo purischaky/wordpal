@@ -1,49 +1,38 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { DashboardCard, DashboardCardEmpty } from '../design-system/DashboardCard';
 import { Timeline } from '../design-system/Timeline';
-import type { TimelineEvent } from '../design-system/Timeline';
+import type { TimelineEvent, TimelineEventType } from '../design-system/Timeline';
+import type { AdminNotification } from '@/types/admin';
 
-// ─── Mock Activity Data ──────────────────────────────────────────────────────
-
-/** Time offsets in ms for each mock event (relative to a fixed reference) */
-const EVENT_OFFSETS: { id: string; offset: number; type: TimelineEvent['type']; title: string; description: string }[] = [
-  { id: 'evt-1', offset: 5 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Maria García joined the platform' },
-  { id: 'evt-2', offset: 22 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Carlos Méndez finished "Present Perfect Tense"' },
-  { id: 'evt-3', offset: 1.5 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Ana Torres scored 85% on B1 challenge' },
-  { id: 'evt-4', offset: 3 * 60 * 60 * 1000, type: 'achievement_unlock', title: 'Achievement unlocked', description: 'Pedro López earned "7-Day Streak" badge' },
-  { id: 'evt-5', offset: 5 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Sofía Ruiz finished "Conditional Sentences"' },
-  { id: 'evt-6', offset: 8 * 60 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Luis Fernández joined the platform' },
-  { id: 'evt-7', offset: 12 * 60 * 60 * 1000, type: 'level_change', title: 'Level advancement', description: 'Elena Morales advanced from A2 to B1' },
-  { id: 'evt-8', offset: 1 * 24 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Javier Díaz scored 72% on A2 challenge' },
-  { id: 'evt-9', offset: 1.5 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Claudia Herrera finished "Relative Clauses"' },
-  { id: 'evt-10', offset: 2 * 24 * 60 * 60 * 1000, type: 'achievement_unlock', title: 'Achievement unlocked', description: 'Martín Rivera earned "Grammar Master" badge' },
-  { id: 'evt-11', offset: 2.5 * 24 * 60 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Isabella Navarro joined the platform' },
-  { id: 'evt-12', offset: 3 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Andrés Vargas finished "Passive Voice"' },
-  { id: 'evt-13', offset: 4 * 24 * 60 * 60 * 1000, type: 'level_change', title: 'Level advancement', description: 'Paula Ramos advanced from B1 to B2' },
-  { id: 'evt-14', offset: 5 * 24 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Daniel Castro scored 91% on C1 challenge' },
-  { id: 'evt-15', offset: 5.5 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Valentina Ortiz finished "Reported Speech"' },
-  { id: 'evt-16', offset: 6 * 24 * 60 * 60 * 1000, type: 'registration', title: 'New student registered', description: 'Ricardo Peña joined the platform' },
-  { id: 'evt-17', offset: 8 * 24 * 60 * 60 * 1000, type: 'achievement_unlock', title: 'Achievement unlocked', description: 'Carmen Jiménez earned "50 Exercises" badge' },
-  { id: 'evt-18', offset: 10 * 24 * 60 * 60 * 1000, type: 'lesson_completed', title: 'Lesson completed', description: 'Miguel Sánchez finished "Modal Verbs"' },
-  { id: 'evt-19', offset: 12 * 24 * 60 * 60 * 1000, type: 'challenge_attempt', title: 'Placement challenge attempted', description: 'Laura Gutiérrez scored 68% on B2 challenge' },
-  { id: 'evt-20', offset: 14 * 24 * 60 * 60 * 1000, type: 'level_change', title: 'Level advancement', description: 'Fernando Reyes advanced from A1 to A2' },
-];
+// ─── Notification -> Timeline mapping ────────────────────────────────────────
 
 /**
- * Generates mock events with a fixed reference time to avoid hydration mismatches.
- * The reference time is captured once and reused for both server and client renders.
+ * Notifications only carry 3 types (registration, challenge_completion,
+ * system_error) while Timeline supports a broader activity vocabulary.
+ * system_error isn't user activity, so it's dropped from this feed.
  */
-function generateMockEvents(referenceTime: number): TimelineEvent[] {
-  return EVENT_OFFSETS.map((item) => ({
-    id: item.id,
-    date: new Date(referenceTime - item.offset).toISOString(),
-    type: item.type,
-    title: item.title,
-    description: item.description,
-  }));
+function notificationTypeToTimelineType(type: AdminNotification['type']): TimelineEventType | null {
+  switch (type) {
+    case 'registration':
+      return 'registration';
+    case 'challenge_completion':
+      return 'challenge_attempt';
+    case 'system_error':
+      return null;
+  }
+}
+
+function toTimelineEvents(notifications: AdminNotification[]): TimelineEvent[] {
+  return notifications.reduce<TimelineEvent[]>((events, n) => {
+    const type = notificationTypeToTimelineType(n.type);
+    if (type) {
+      events.push({ id: n.id, date: n.createdAt, type, title: n.title, description: n.description });
+    }
+    return events;
+  }, []);
 }
 
 // ─── Quick Actions ───────────────────────────────────────────────────────────
@@ -56,16 +45,6 @@ interface QuickAction {
 }
 
 const quickActions: QuickAction[] = [
-  {
-    label: 'Generate AI Lesson',
-    href: '/admin/ai-studio',
-    description: 'Create lesson content with AI',
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-      </svg>
-    ),
-  },
   {
     label: 'Create Learning Path',
     href: '/admin/learning-paths/new',
@@ -101,7 +80,7 @@ const quickActions: QuickAction[] = [
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export interface RecentActivitySectionProps {
-  /** Activity events to display. Defaults to mock data if not provided. */
+  /** Activity events to display. Defaults to fetching from /api/admin/notifications. */
   events?: TimelineEvent[];
 }
 
@@ -118,20 +97,48 @@ export interface RecentActivitySectionProps {
  * @validates Requirements 3.3, 3.4, 3.7
  */
 export function RecentActivitySection({ events }: RecentActivitySectionProps) {
-  // Use a fixed reference time (start of today UTC) to avoid hydration mismatches.
-  // Since this is mock data, the exact time doesn't matter — what matters is
-  // that server and client compute the same dates.
-  const referenceTime = new Date().setUTCHours(12, 0, 0, 0);
-  const activityEvents = events ?? generateMockEvents(referenceTime);
+  const [fetchedEvents, setFetchedEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(events === undefined);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (events !== undefined) return;
+
+    let cancelled = false;
+    fetch('/api/admin/notifications')
+      .then((res) => res.json())
+      .then((json) => {
+        if (cancelled) return;
+        if (json.error) {
+          setError(true);
+        } else {
+          setFetchedEvents(toTimelineEvents(json.data as AdminNotification[]));
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [events]);
+
   // Limit to 20 events max
-  const displayEvents = activityEvents.slice(0, 20);
+  const displayEvents = (events ?? fetchedEvents).slice(0, 20);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Recent Activity Feed - takes 2/3 of the space on desktop */}
       <div className="lg:col-span-2">
-        <DashboardCard title="Recent Activity">
-          {displayEvents.length === 0 ? (
+        <DashboardCard title="Recent Activity" loading={loading}>
+          {error ? (
+            <DashboardCardEmpty message="Failed to load recent activity" />
+          ) : displayEvents.length === 0 ? (
             <DashboardCardEmpty message="No recent activity available" />
           ) : (
             <Timeline events={displayEvents} maxItems={10} />

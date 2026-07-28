@@ -3,6 +3,9 @@
  * Covers roles, permissions, content management, analytics, and platform settings.
  */
 
+import type { BlockCategory } from './exercise';
+export type { BlockCategory } from './exercise';
+
 // ─── Core Enums & Union Types ────────────────────────────────────────────────
 
 /** User roles within the admin system */
@@ -25,16 +28,6 @@ export type ExerciseType =
   | 'fill-in-blank'
   | 'rewrite-sentence'
   | 'free-writing';
-
-/** Grammar block categories used in drag-and-drop exercises */
-export type BlockCategory =
-  | 'subject'
-  | 'verb'
-  | 'object'
-  | 'time'
-  | 'place'
-  | 'connector'
-  | 'modifier';
 
 // ─── User & Auth ─────────────────────────────────────────────────────────────
 
@@ -180,8 +173,7 @@ export interface AdminPlacementChallenge {
   targetLevel: CEFRLevel;
   grammarTopics: string[];
   difficulty: 1 | 2 | 3 | 4 | 5;
-  exerciseTypes: ExerciseType[];
-  questionCount: number;      // 5-50
+  questionCount: number;      // derived: count of questions actually added; 5+ required to publish
   status: LearningPathStatus;
   questions: AdminExercise[];
   createdAt: string;
@@ -236,29 +228,12 @@ export interface AdminNotification {
   type:
     | 'registration'
     | 'challenge_completion'
-    | 'ai_generation'
-    | 'system_error'
-    | 'ai_insight';
+    | 'system_error';
   title: string;
   description: string;        // max 120 chars
   isRead: boolean;
   contextUrl: string;
   createdAt: string;
-}
-
-// ─── AI Insights ─────────────────────────────────────────────────────────────
-
-/** An AI-generated learning insight for administrators */
-export interface AIInsight {
-  id: string;
-  title: string;              // max 100 chars
-  description: string;        // max 300 chars
-  affectedStudentCount: number;
-  priority: 'high' | 'medium' | 'low';
-  suggestedAction: string;
-  actionType: 'content_gap' | 'student_performance';
-  actionParams: Record<string, string>;
-  generatedAt: string;
 }
 
 // ─── Platform Settings ───────────────────────────────────────────────────────
@@ -270,7 +245,6 @@ export interface PlatformSettings {
     themeColors: { primary: string; secondary: string; accent: string };
     language: string;
   };
-  aiModel: string;
   scoring: {
     xpPerExercise: number;      // 1-1000
     xpPerLesson: number;        // 1-10000
@@ -294,7 +268,6 @@ export type AdminSection =
   | 'units'
   | 'lessons'
   | 'exercises'
-  | 'ai-studio'
   | 'challenges'
   | 'analytics'
   | 'achievements'
@@ -317,7 +290,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly AdminSection[]> = {
     'units',
     'lessons',
     'exercises',
-    'ai-studio',
     'challenges',
     'analytics',
     'achievements',
@@ -331,7 +303,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly AdminSection[]> = {
     'units',
     'lessons',
     'exercises',
-    'ai-studio',
     'challenges',
     'analytics',
     'achievements',
@@ -343,7 +314,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly AdminSection[]> = {
     'units',
     'lessons',
     'exercises',
-    'ai-studio',
     'profile',
   ],
   student: [],

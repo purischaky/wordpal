@@ -223,7 +223,6 @@ export function Timeline({
                 <time
                   className="mt-1 block text-xs text-muted-foreground/70"
                   dateTime={event.date}
-                  suppressHydrationWarning
                 >
                   {formatTimelineDate(event.date)}
                 </time>

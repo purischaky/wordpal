@@ -21,6 +21,16 @@ export function validateLessonCreate(body: unknown): ValidationResult {
     errors.push('title must not exceed 150 characters');
   }
 
+  // unitId — required, the lesson's parent unit
+  if (!data.unitId || typeof data.unitId !== 'string') {
+    errors.push('unitId is required and must be a string');
+  }
+
+  // position — required, must be a positive integer
+  if (typeof data.position !== 'number' || data.position <= 0) {
+    errors.push('position is required and must be a positive number');
+  }
+
   // description — optional, max 500 chars
   if (data.description !== undefined) {
     if (typeof data.description !== 'string') {

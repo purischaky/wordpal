@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { CEFRLevel, ExerciseType } from '@/types/admin';
+import type { CEFRLevel } from '@/types/admin';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -12,8 +12,6 @@ interface ChallengeFormData {
   targetLevel: CEFRLevel | '';
   grammarTopics: string[];
   difficulty: '' | '1' | '2' | '3' | '4' | '5';
-  exerciseTypes: ExerciseType[];
-  questionCount: string;
 }
 
 interface FormErrors {
@@ -21,8 +19,6 @@ interface FormErrors {
   targetLevel?: string;
   grammarTopics?: string;
   difficulty?: string;
-  exerciseTypes?: string;
-  questionCount?: string;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -41,15 +37,6 @@ const GRAMMAR_TOPICS = [
   'Articles',
   'Prepositions',
 ] as const;
-
-const EXERCISE_TYPES: { value: ExerciseType; label: string }[] = [
-  { value: 'drag-and-drop', label: 'Drag & Drop' },
-  { value: 'multiple-choice', label: 'Multiple Choice' },
-  { value: 'sentence-ordering', label: 'Sentence Ordering' },
-  { value: 'fill-in-blank', label: 'Fill in the Blank' },
-  { value: 'rewrite-sentence', label: 'Rewrite Sentence' },
-  { value: 'free-writing', label: 'Free Writing' },
-];
 
 const DIFFICULTY_OPTIONS = [
   { value: '1', label: '1 - Very Easy' },
@@ -86,23 +73,6 @@ function validateChallengeForm(data: ChallengeFormData): FormErrors {
     errors.difficulty = 'Difficulty is required.';
   }
 
-  // Exercise Types: at least one
-  if (data.exerciseTypes.length === 0) {
-    errors.exerciseTypes = 'Select at least one exercise type.';
-  }
-
-  // Number of Questions: required, integer 5-50
-  const qCount = parseInt(data.questionCount, 10);
-  if (!data.questionCount.trim()) {
-    errors.questionCount = 'Number of questions is required.';
-  } else if (isNaN(qCount) || !Number.isInteger(qCount)) {
-    errors.questionCount = 'Must be a whole number.';
-  } else if (qCount < 5) {
-    errors.questionCount = 'Minimum is 5 questions.';
-  } else if (qCount > 50) {
-    errors.questionCount = 'Maximum is 50 questions.';
-  }
-
   return errors;
 }
 
@@ -116,8 +86,6 @@ export default function NewChallengePage() {
     targetLevel: '',
     grammarTopics: [],
     difficulty: '',
-    exerciseTypes: [],
-    questionCount: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -160,28 +128,9 @@ export default function NewChallengePage() {
     });
   }, []);
 
-  // Toggle exercise type selection
-  const toggleExerciseType = useCallback((type: ExerciseType) => {
-    setFormData((prev) => {
-      const isSelected = prev.exerciseTypes.includes(type);
-      const updated = isSelected
-        ? prev.exerciseTypes.filter((t) => t !== type)
-        : [...prev.exerciseTypes, type];
-      return { ...prev, exerciseTypes: updated };
-    });
-    setErrors((prev) => {
-      if (prev.exerciseTypes) {
-        const next = { ...prev };
-        delete next.exerciseTypes;
-        return next;
-      }
-      return prev;
-    });
-  }, []);
-
   // Handle form submission
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
 
       const validationErrors = validateChallengeForm(formData);
@@ -193,16 +142,34 @@ export default function NewChallengePage() {
 
       setIsSubmitting(true);
 
-      // Simulate save (mock async operation)
-      setTimeout(() => {
+      try {
+        const res = await fetch('/api/admin/challenges', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: formData.title,
+            targetLevel: formData.targetLevel,
+            grammarTopics: formData.grammarTopics,
+            difficulty: Number(formData.difficulty),
+          }),
+        });
+        const json = await res.json();
+
+        if (!res.ok) {
+          setErrors({ title: json.error || 'Failed to create challenge' });
+          setIsSubmitting(false);
+          return;
+        }
+
         setIsSubmitting(false);
         setSubmitSuccess(true);
-
-        // Redirect to list page after short delay
         setTimeout(() => {
-          router.push('/admin/challenges');
-        }, 1500);
-      }, 800);
+          router.push(`/admin/challenges/${json.data.id}/edit`);
+        }, 1200);
+      } catch (error) {
+        setErrors({ title: 'Failed to create challenge. Please try again.' });
+        setIsSubmitting(false);
+      }
     },
     [formData, router]
   );
@@ -364,160 +331,43 @@ export default function NewChallengePage() {
               </fieldset>
             </div>
 
-            {/* Difficulty + Number of Questions (side by side) */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {/* Difficulty */}
-              <div>
-                <label
-                  htmlFor="ch-difficulty"
-                  className="block text-sm font-medium text-foreground"
-                >
-                  Difficulty <span className="text-destructive">*</span>
-                </label>
-                <select
-                  id="ch-difficulty"
-                  value={formData.difficulty}
-                  onChange={(e) => updateField('difficulty', e.target.value as ChallengeFormData['difficulty'])}
-                  aria-describedby={errors.difficulty ? 'ch-difficulty-error' : undefined}
-                  aria-invalid={!!errors.difficulty}
-                  className={`mt-1.5 block w-full rounded-[12px] border px-3.5 py-2.5 text-sm text-foreground transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring ${
-                    errors.difficulty
-                      ? 'border-destructive bg-destructive/5'
-                      : 'border-input bg-background'
-                  }`}
-                >
-                  <option value="">Select difficulty...</option>
-                  {DIFFICULTY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.difficulty && (
-                  <p id="ch-difficulty-error" className="mt-1 text-xs text-destructive" role="alert">
-                    {errors.difficulty}
-                  </p>
-                )}
-              </div>
-
-              {/* Number of Questions */}
-              <div>
-                <label
-                  htmlFor="ch-question-count"
-                  className="block text-sm font-medium text-foreground"
-                >
-                  Number of Questions <span className="text-destructive">*</span>
-                </label>
-                <input
-                  id="ch-question-count"
-                  type="number"
-                  min={5}
-                  max={50}
-                  step={1}
-                  value={formData.questionCount}
-                  onChange={(e) => updateField('questionCount', e.target.value)}
-                  placeholder="5–50"
-                  aria-describedby={errors.questionCount ? 'ch-question-count-error' : undefined}
-                  aria-invalid={!!errors.questionCount}
-                  className={`mt-1.5 block w-full rounded-[12px] border px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring ${
-                    errors.questionCount
-                      ? 'border-destructive bg-destructive/5'
-                      : 'border-input bg-background'
-                  }`}
-                />
-                {errors.questionCount && (
-                  <p id="ch-question-count-error" className="mt-1 text-xs text-destructive" role="alert">
-                    {errors.questionCount}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Exercise Types (multi-select) */}
+            {/* Difficulty */}
             <div>
-              <fieldset>
-                <legend className="block text-sm font-medium text-foreground">
-                  Exercise Types <span className="text-destructive">*</span>
-                </legend>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Choose which exercise formats to include in the challenge.
+              <label
+                htmlFor="ch-difficulty"
+                className="block text-sm font-medium text-foreground"
+              >
+                Difficulty <span className="text-destructive">*</span>
+              </label>
+              <select
+                id="ch-difficulty"
+                value={formData.difficulty}
+                onChange={(e) => updateField('difficulty', e.target.value as ChallengeFormData['difficulty'])}
+                aria-describedby={errors.difficulty ? 'ch-difficulty-error' : undefined}
+                aria-invalid={!!errors.difficulty}
+                className={`mt-1.5 block w-full rounded-[12px] border px-3.5 py-2.5 text-sm text-foreground transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring ${
+                  errors.difficulty
+                    ? 'border-destructive bg-destructive/5'
+                    : 'border-input bg-background'
+                }`}
+              >
+                <option value="">Select difficulty...</option>
+                {DIFFICULTY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              {errors.difficulty && (
+                <p id="ch-difficulty-error" className="mt-1 text-xs text-destructive" role="alert">
+                  {errors.difficulty}
                 </p>
-                <div
-                  className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"
-                  role="group"
-                  aria-describedby={errors.exerciseTypes ? 'ch-exercise-types-error' : undefined}
-                >
-                  {EXERCISE_TYPES.map(({ value, label }) => {
-                    const isSelected = formData.exerciseTypes.includes(value);
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => toggleExerciseType(value)}
-                        aria-pressed={isSelected}
-                        className={`flex items-center gap-2 rounded-[12px] border px-3.5 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring ${
-                          isSelected
-                            ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20'
-                            : 'border-input bg-background text-foreground hover:bg-accent dark:bg-card'
-                        }`}
-                      >
-                        <span
-                          className={`flex h-4 w-4 items-center justify-center rounded border transition-colors ${
-                            isSelected
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-muted-foreground/40'
-                          }`}
-                        >
-                          {isSelected && (
-                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" aria-hidden="true">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                            </svg>
-                          )}
-                        </span>
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-                {errors.exerciseTypes && (
-                  <p id="ch-exercise-types-error" className="mt-1.5 text-xs text-destructive" role="alert">
-                    {errors.exerciseTypes}
-                  </p>
-                )}
-              </fieldset>
+              )}
             </div>
-          </div>
-        </div>
 
-        {/* Generate with AI button placement (functional in task 12.2) */}
-        <div className="rounded-xl border border-dashed border-border bg-muted/30 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  Generate with AI
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Auto-generate questions based on your configuration
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              disabled
-              className="inline-flex items-center gap-2 rounded-[12px] bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Generate with AI (available after saving)"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-              </svg>
-              Generate
-            </button>
+            <p className="text-xs text-muted-foreground">
+              Questions are added one at a time after creating the challenge — at least 5 are required before it can be published.
+            </p>
           </div>
         </div>
 

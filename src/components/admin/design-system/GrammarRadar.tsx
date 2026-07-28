@@ -32,9 +32,10 @@ const CATEGORY_LABELS: Record<BlockCategory, string> = {
   place: 'Place',
   connector: 'Connector',
   modifier: 'Modifier',
+  contrast: 'Contrast',
 };
 
-/** All 7 grammar block categories in display order */
+/** All 8 grammar block categories in display order */
 const ALL_CATEGORIES: BlockCategory[] = [
   'subject',
   'verb',
@@ -43,6 +44,7 @@ const ALL_CATEGORIES: BlockCategory[] = [
   'place',
   'connector',
   'modifier',
+  'contrast',
 ];
 
 // ─── Tooltip ─────────────────────────────────────────────────────────────────

@@ -25,7 +25,9 @@ export function RegisterForm() {
   const [passwordError, setPasswordError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const redirectTo = searchParams.get('redirect') || '/dashboard'
+  // Public registration always creates a 'student' (enforced server-side
+  // by the handle_new_user trigger), so there's no role to branch on here.
+  const redirectTo = searchParams.get('redirect') || '/learn'
 
   // Redirect when user becomes authenticated
   useEffect(() => {

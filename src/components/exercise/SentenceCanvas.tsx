@@ -33,8 +33,10 @@ function getColorClass(category: BlockCategory): string {
       return 'bg-block-time border-block-time-dark text-white'
     case 'place':
       return 'bg-block-place border-block-place-dark text-white'
+    case 'connector':
+      return 'bg-block-connector border-block-connector-dark text-white'
     case 'contrast':
-      return 'bg-rose-500 border-rose-700 text-white'
+      return 'bg-block-contrast border-block-contrast-dark text-white'
   }
 }
 

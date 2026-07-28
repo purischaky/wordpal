@@ -34,55 +34,6 @@ interface EditableLearningPath {
   units: EditableUnit[];
 }
 
-// ─── Mock Data ───────────────────────────────────────────────────────────────
-
-function getMockLearningPath(id: string): EditableLearningPath {
-  return {
-    id,
-    title: 'Intermediate Grammar Mastery',
-    description: 'Develop fluency with complex sentence structures, conditionals, and reported speech.',
-    targetLevel: 'B1',
-    estimatedDuration: 2400,
-    difficulty: 'Intermediate',
-    xpReward: 1200,
-    status: 'draft',
-    units: [
-      {
-        id: 'unit-1',
-        title: 'Conditionals',
-        description: 'Master zero, first, second, and third conditionals.',
-        order: 1,
-        lessons: [
-          { id: 'lesson-1-1', title: 'Zero & First Conditional', status: 'published', order: 1 },
-          { id: 'lesson-1-2', title: 'Second Conditional', status: 'published', order: 2 },
-          { id: 'lesson-1-3', title: 'Third Conditional', status: 'draft', order: 3 },
-        ],
-      },
-      {
-        id: 'unit-2',
-        title: 'Reported Speech',
-        description: 'Transform direct speech into reported speech and vice versa.',
-        order: 2,
-        lessons: [
-          { id: 'lesson-2-1', title: 'Statements in Reported Speech', status: 'published', order: 1 },
-          { id: 'lesson-2-2', title: 'Questions in Reported Speech', status: 'draft', order: 2 },
-        ],
-      },
-      {
-        id: 'unit-3',
-        title: 'Passive Voice',
-        description: 'Use passive constructions in various tenses and contexts.',
-        order: 3,
-        lessons: [
-          { id: 'lesson-3-1', title: 'Present & Past Passive', status: 'published', order: 1 },
-          { id: 'lesson-3-2', title: 'Passive with Modals', status: 'incomplete', order: 2 },
-          { id: 'lesson-3-3', title: 'Causative Passive', status: 'draft', order: 3 },
-        ],
-      },
-    ],
-  };
-}
-
 // ─── Helper Components ───────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
@@ -160,35 +111,36 @@ export default function EditLearningPathPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const [learningPath, setLearningPath] = useState<EditableLearningPath>(() =>
-    getMockLearningPath(id)
-  );
+  const [learningPath, setLearningPath] = useState<EditableLearningPath | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Dialog states
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
-  // Fetch learning path data from API
+  // Fetch learning path data (with nested units/lessons) from the API
   useEffect(() => {
+    let cancelled = false;
     async function fetchLearningPath() {
       try {
-        const res = await fetch('/api/admin/learning-paths');
+        const res = await fetch(`/api/admin/learning-paths/${id}`);
         const json = await res.json();
-        if (json.data) {
-          const found = json.data.find((lp: EditableLearningPath) => lp.id === id);
-          if (found) {
-            setLearningPath(found);
-          }
+        if (cancelled) return;
+        if (json.error) {
+          setLoadError(json.error);
+        } else {
+          setLearningPath(json.data);
         }
       } catch (error) {
-        console.error('Failed to fetch learning path:', error);
+        if (!cancelled) setLoadError('Failed to load learning path');
       } finally {
-        setIsLoadingData(false);
+        if (!cancelled) setIsLoadingData(false);
       }
     }
     fetchLearningPath();
+    return () => { cancelled = true; };
   }, [id]);
 
   // Drag state
@@ -218,6 +170,7 @@ export default function EditLearningPathPage({
       }
 
       setLearningPath((prev) => {
+        if (!prev) return prev;
         const units = [...prev.units];
         const dragIdx = units.findIndex((u) => u.id === draggedUnitId);
         const dropIdx = units.findIndex((u) => u.id === targetUnitId);
@@ -228,12 +181,22 @@ export default function EditLearningPathPage({
 
         // Re-assign order values
         const reordered = units.map((u, i) => ({ ...u, order: i + 1 }));
+
+        fetch(`/api/admin/learning-paths/${id}/reorder`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ unitIds: reordered.map((u) => u.id) }),
+        }).catch(() => {
+          // Optimistic update already applied; a transient failure here
+          // just means the next full reload shows the pre-drag order.
+        });
+
         return { ...prev, units: reordered };
       });
 
       setDraggedUnitId(null);
     },
-    [draggedUnitId]
+    [draggedUnitId, id]
   );
 
   const handleUnitDragEnd = useCallback(() => {
@@ -273,6 +236,7 @@ export default function EditLearningPathPage({
       }
 
       setLearningPath((prev) => {
+        if (!prev) return prev;
         const units = prev.units.map((u) => ({
           ...u,
           lessons: [...u.lessons],
@@ -304,13 +268,28 @@ export default function EditLearningPathPage({
           targetUnit.lessons = targetUnit.lessons.map((l, i) => ({ ...l, order: i + 1 }));
         }
 
+        const affectedUnits = sourceUnit.id === targetUnit.id
+          ? [{ unitId: targetUnit.id, lessonIds: targetUnit.lessons.map((l) => l.id) }]
+          : [
+              { unitId: sourceUnit.id, lessonIds: sourceUnit.lessons.map((l) => l.id) },
+              { unitId: targetUnit.id, lessonIds: targetUnit.lessons.map((l) => l.id) },
+            ];
+
+        fetch(`/api/admin/learning-paths/${id}/reorder-lessons`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ units: affectedUnits }),
+        }).catch(() => {
+          // Optimistic update already applied.
+        });
+
         return { ...prev, units };
       });
 
       setDraggedLessonId(null);
       setDragSourceUnitId(null);
     },
-    [draggedLessonId, dragSourceUnitId]
+    [draggedLessonId, dragSourceUnitId, id]
   );
 
   const handleLessonDragEnd = useCallback(() => {
@@ -321,6 +300,7 @@ export default function EditLearningPathPage({
   // ─── Publish Logic ───────────────────────────────────────────────────────
 
   const handlePublishClick = useCallback(() => {
+    if (!learningPath) return;
     setPublishError(null);
     const result = validateLearningPathPublish({
       id: learningPath.id,
@@ -341,11 +321,12 @@ export default function EditLearningPathPage({
   }, [learningPath]);
 
   const confirmPublish = useCallback(async () => {
+    if (!learningPath) return;
     try {
       const res = await fetch(`/api/admin/learning-paths/${learningPath.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...learningPath, status: 'published' }),
+        body: JSON.stringify({ status: 'published' }),
       });
 
       if (!res.ok) {
@@ -355,7 +336,7 @@ export default function EditLearningPathPage({
         return;
       }
 
-      setLearningPath((prev) => ({ ...prev, status: 'published' }));
+      setLearningPath((prev) => (prev ? { ...prev, status: 'published' } : prev));
       setPublishDialogOpen(false);
     } catch (error) {
       setPublishError('Failed to publish learning path. Please try again.');
@@ -365,11 +346,12 @@ export default function EditLearningPathPage({
 
   // ─── Delete Logic ────────────────────────────────────────────────────────
 
-  const units = learningPath.units || [];
+  const units = learningPath?.units ?? [];
   const totalUnits = units.length;
   const totalLessons = units.reduce((sum, u) => sum + (u.lessons || []).length, 0);
 
   const confirmDelete = useCallback(async () => {
+    if (!learningPath) return;
     try {
       await fetch(`/api/admin/learning-paths/${learningPath.id}`, {
         method: 'DELETE',
@@ -380,9 +362,30 @@ export default function EditLearningPathPage({
       setDeleteDialogOpen(false);
       window.location.href = '/admin/learning-paths';
     }
-  }, [learningPath.id]);
+  }, [learningPath]);
 
   // ─── Render ──────────────────────────────────────────────────────────────
+
+  if (isLoadingData) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-48 rounded bg-accent/50" />
+        <div className="h-32 rounded-xl bg-accent/50" />
+        <div className="h-64 rounded-xl bg-accent/50" />
+      </div>
+    );
+  }
+
+  if (loadError || !learningPath) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-foreground">Learning Path</h1>
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
+          <p className="text-sm text-destructive">{loadError || 'Learning path not found'}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -482,15 +485,15 @@ export default function EditLearningPathPage({
           </p>
         </div>
 
-        {(learningPath.units || []).length === 0 ? (
+        {units.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
             <p className="text-sm text-muted-foreground">
-              No units yet. Add a unit to get started.
+              No units yet. Units and lessons are created from the Lessons section.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {(learningPath.units || []).map((unit) => (
+            {units.map((unit) => (
               <div
                 key={unit.id}
                 draggable
@@ -522,9 +525,11 @@ export default function EditLearningPathPage({
                         {unit.title}
                       </h3>
                     </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {unit.description}
-                    </p>
+                    {unit.description && (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {unit.description}
+                      </p>
+                    )}
                   </div>
 
                   <span className="text-xs text-muted-foreground">
@@ -575,9 +580,12 @@ export default function EditLearningPathPage({
                           {lesson.order}
                         </span>
 
-                        <span className="flex-1 text-sm text-foreground">
+                        <Link
+                          href={`/admin/lessons/${lesson.id}/edit`}
+                          className="flex-1 text-sm text-foreground hover:text-primary hover:underline"
+                        >
                           {lesson.title}
-                        </span>
+                        </Link>
 
                         <StatusBadge status={lesson.status} />
                       </div>

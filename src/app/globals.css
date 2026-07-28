@@ -67,6 +67,12 @@
   --color-block-place: var(--wp-block-place);
   --color-block-place-dark: var(--wp-block-place-dark);
   --color-block-place-light: var(--wp-block-place-light);
+  --color-block-connector: var(--wp-block-connector);
+  --color-block-connector-dark: var(--wp-block-connector-dark);
+  --color-block-connector-light: var(--wp-block-connector-light);
+  --color-block-contrast: var(--wp-block-contrast);
+  --color-block-contrast-dark: var(--wp-block-contrast-dark);
+  --color-block-contrast-light: var(--wp-block-contrast-light);
 
   /* WordPal Surface Colors */
   --color-surface: var(--wp-surface);
@@ -150,6 +156,12 @@
   --wp-block-place: #06B6D4;
   --wp-block-place-dark: #0E7490;
   --wp-block-place-light: #ECFEFF;
+  --wp-block-connector: #64748B;
+  --wp-block-connector-dark: #334155;
+  --wp-block-connector-light: #F1F5F9;
+  --wp-block-contrast: #EC4899;
+  --wp-block-contrast-dark: #BE185D;
+  --wp-block-contrast-light: #FDF2F8;
 
   /* WordPal Surface Colors */
   --wp-surface: #FAFAFA;

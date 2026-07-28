@@ -45,6 +45,11 @@ export function validateAchievementCreate(body: unknown): ValidationResult {
     errors.push(`triggerCriteria must be one of: ${VALID_TRIGGER_CRITERIA.join(', ')}`);
   }
 
+  // thresholdValue — required, must be a positive number
+  if (typeof data.thresholdValue !== 'number' || data.thresholdValue < 1) {
+    errors.push('thresholdValue is required and must be a number >= 1');
+  }
+
   return { valid: errors.length === 0, errors };
 }
 

@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BarChart3, Trophy, Menu, X } from 'lucide-react'
+import { Home, BookOpen, BarChart3, Trophy, Menu, X } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 
 const navLinks = [
   { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/learn', label: 'Learn', icon: BookOpen },
   { href: '/progress', label: 'Progress', icon: BarChart3 },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
 ]

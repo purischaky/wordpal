@@ -33,7 +33,13 @@ function getInitialDarkMode(): boolean {
  * Manages dark mode state (persisted to localStorage) and provides
  * placeholder user/notification data until real auth context is connected.
  */
-export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
+export function AdminLayoutShell({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user: AdminUser;
+}) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -72,34 +78,17 @@ export function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     console.log('Global search:', query);
   }, []);
 
-  // Placeholder user until real auth context is integrated
-  const placeholderUser: AdminUser = {
-    id: 'current-user',
-    email: 'admin@wordpal.com',
-    displayName: 'Admin User',
-    role: 'admin',
-    avatarUrl: null,
-    cefrLevel: 'C2',
-    status: 'active',
-    currentLessonId: null,
-    currentLearningPathId: null,
-    grammarScore: 100,
-    progressPercentage: 100,
-    joinedAt: new Date().toISOString(),
-    lastActiveAt: new Date().toISOString(),
-  };
-
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <TopNav
-        user={placeholderUser}
+        user={user}
         notificationCount={0}
         onSearch={handleSearch}
         onThemeToggle={handleThemeToggle}
         isDarkMode={isDarkMode}
       />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
+        <Sidebar userRole={user.role} />
         <main className="flex-1 overflow-y-auto bg-muted/30 p-6 dark:bg-background">
           <ErrorBoundary>
             {children}

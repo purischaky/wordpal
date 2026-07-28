@@ -10,8 +10,8 @@ export type { TimelineProps, TimelineEvent, TimelineEventType } from './Timeline
 export { GrammarRadar } from './GrammarRadar';
 export type { GrammarRadarProps } from './GrammarRadar';
 
-export { AIInsightCard } from './AIInsightCard';
-export type { AIInsightCardProps } from './AIInsightCard';
-
 export { NotificationCenter, formatBadgeCount, formatRelativeTimestamp } from './NotificationCenter';
 export type { NotificationCenterProps } from './NotificationCenter';
+
+export { SectionInDevelopment } from './SectionInDevelopment';
+export type { SectionInDevelopmentProps } from './SectionInDevelopment';

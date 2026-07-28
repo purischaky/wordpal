@@ -10,7 +10,8 @@ import { ROLE_PERMISSIONS } from '@/types/admin';
 
 export interface SidebarProps {
   currentPath?: string;
-  userRole?: UserRole;
+  /** Required: an authorization component must never default to a permissive role. */
+  userRole: UserRole;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
@@ -21,75 +22,6 @@ export interface NavItem {
   icon: React.ReactNode;
   section: AdminSection;
   requiredRoles: UserRole[];
-}
-
-export interface BreadcrumbItem {
-  label: string;
-  href: string;
-}
-
-// ─── Breadcrumb Utility ──────────────────────────────────────────────────────
-
-const SEGMENT_LABELS: Record<string, string> = {
-  admin: 'Dashboard',
-  students: 'Students',
-  'learning-paths': 'Learning Paths',
-  lessons: 'Lessons',
-  exercises: 'Exercises',
-  'ai-studio': 'AI Content Studio',
-  challenges: 'Challenges',
-  analytics: 'Analytics',
-  achievements: 'Achievements',
-  settings: 'Settings',
-  profile: 'Profile',
-  notifications: 'Notifications',
-  denied: 'Access Denied',
-  new: 'New',
-  edit: 'Edit',
-};
-
-/**
- * Generates breadcrumb items from a pathname.
- * Max depth of 5 levels. Maps path segments to readable labels.
- *
- * @param pathname - e.g. "/admin/learning-paths/123/edit"
- * @returns Array of breadcrumb items with label and href
- */
-export function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
-  // Remove trailing slash and split
-  const cleaned = pathname.replace(/\/$/, '') || '/admin';
-  const segments = cleaned.split('/').filter(Boolean);
-
-  // Build breadcrumbs from segments, max depth 5
-  const breadcrumbs: BreadcrumbItem[] = [];
-  let currentPath = '';
-
-  for (let i = 0; i < segments.length && breadcrumbs.length < 5; i++) {
-    const segment = segments[i];
-    currentPath += `/${segment}`;
-
-    // Get a readable label for this segment
-    const label = SEGMENT_LABELS[segment] ?? formatSegmentLabel(segment);
-    breadcrumbs.push({ label, href: currentPath });
-  }
-
-  return breadcrumbs;
-}
-
-/**
- * Formats a path segment into a readable label.
- * Handles UUIDs/IDs by showing them truncated, and kebab-case by converting to title case.
- */
-function formatSegmentLabel(segment: string): string {
-  // If it looks like a UUID or numeric ID, show as "Detail"
-  if (/^[0-9a-f-]{8,}$/i.test(segment) || /^\d+$/.test(segment)) {
-    return 'Detail';
-  }
-  // Convert kebab-case to Title Case
-  return segment
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
 }
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -122,22 +54,6 @@ function LessonsIcon() {
   return (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-    </svg>
-  );
-}
-
-function ExercisesIcon() {
-  return (
-    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-    </svg>
-  );
-}
-
-function AIStudioIcon() {
-  return (
-    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
     </svg>
   );
 }
@@ -183,14 +99,6 @@ function HamburgerIcon() {
   );
 }
 
-function ChevronRightIcon() {
-  return (
-    <svg className="h-3 w-3 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-    </svg>
-  );
-}
-
 // ─── Navigation Items ────────────────────────────────────────────────────────
 
 /**
@@ -207,54 +115,20 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Students', href: '/admin/students', icon: <StudentsIcon />, section: 'students', requiredRoles: getRolesForSection('students') },
   { label: 'Learning Paths', href: '/admin/learning-paths', icon: <LearningPathsIcon />, section: 'learning-paths', requiredRoles: getRolesForSection('learning-paths') },
   { label: 'Lessons', href: '/admin/lessons', icon: <LessonsIcon />, section: 'lessons', requiredRoles: getRolesForSection('lessons') },
-  { label: 'Exercises', href: '/admin/exercises', icon: <ExercisesIcon />, section: 'exercises', requiredRoles: getRolesForSection('exercises') },
-  { label: 'AI Content Studio', href: '/admin/ai-studio', icon: <AIStudioIcon />, section: 'ai-studio', requiredRoles: getRolesForSection('ai-studio') },
   { label: 'Challenges', href: '/admin/challenges', icon: <ChallengesIcon />, section: 'challenges', requiredRoles: getRolesForSection('challenges') },
   { label: 'Analytics', href: '/admin/analytics', icon: <AnalyticsIcon />, section: 'analytics', requiredRoles: getRolesForSection('analytics') },
   { label: 'Achievements', href: '/admin/achievements', icon: <AchievementsIcon />, section: 'achievements', requiredRoles: getRolesForSection('achievements') },
   { label: 'Settings', href: '/admin/settings', icon: <SettingsIcon />, section: 'settings', requiredRoles: getRolesForSection('settings') },
 ];
 
-// ─── Breadcrumb Component ────────────────────────────────────────────────────
-
-function Breadcrumbs({ pathname }: { pathname: string }) {
-  const breadcrumbs = generateBreadcrumbs(pathname);
-
-  if (breadcrumbs.length <= 1) return null;
-
-  return (
-    <nav aria-label="Breadcrumb" className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
-      <ol className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 overflow-x-auto">
-        {breadcrumbs.map((crumb, index) => (
-          <li key={crumb.href} className="flex items-center gap-1 whitespace-nowrap">
-            {index > 0 && <ChevronRightIcon />}
-            {index === breadcrumbs.length - 1 ? (
-              <span className="font-medium text-gray-900 dark:text-white" aria-current="page">
-                {crumb.label}
-              </span>
-            ) : (
-              <Link
-                href={crumb.href}
-                className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-              >
-                {crumb.label}
-              </Link>
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
-}
-
 // ─── Sidebar Component ───────────────────────────────────────────────────────
 
 export function Sidebar({
   currentPath,
-  userRole = 'admin',
+  userRole,
   isCollapsed: controlledCollapsed,
   onToggleCollapse,
-}: SidebarProps = {}) {
+}: SidebarProps) {
   const pathname = usePathname();
   const activePath = currentPath ?? pathname;
 
@@ -401,9 +275,6 @@ export function Sidebar({
             <HamburgerIcon />
           </button>
         </div>
-
-        {/* Breadcrumbs (only when expanded) */}
-        {!isCollapsed && <Breadcrumbs pathname={activePath} />}
 
         {/* Nav links */}
         {navContent}

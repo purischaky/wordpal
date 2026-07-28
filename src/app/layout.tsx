@@ -11,7 +11,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "WordPal - Build English, Block by Block",
   description:
-    "A gamified English sentence-building app using drag-and-drop grammar blocks with AI-powered feedback.",
+    "A gamified English sentence-building app using drag-and-drop grammar blocks with step-by-step tutor explanations.",
 };
 
 export default function RootLayout({

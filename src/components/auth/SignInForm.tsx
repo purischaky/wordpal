@@ -13,7 +13,7 @@ function mapAuthError(error: string): string {
 }
 
 export function SignInForm() {
-  const { signIn, user, loading, error: authError } = useAuth()
+  const { signIn, user, role, loading, error: authError } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -23,14 +23,19 @@ export function SignInForm() {
   const [passwordError, setPasswordError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const redirectTo = searchParams.get('redirect') || '/dashboard'
+  const explicitRedirect = searchParams.get('redirect')
 
-  // Redirect when user becomes authenticated
+  // Redirect once the session (and therefore the role) has resolved.
+  // Staff land on /admin, students on /learn — unless the middleware
+  // sent them here with an explicit ?redirect= for the page they wanted.
   useEffect(() => {
-    if (user && !loading) {
-      router.push(redirectTo)
+    if (!user || loading) return
+    if (explicitRedirect) {
+      router.push(explicitRedirect)
+      return
     }
-  }, [user, loading, router, redirectTo])
+    router.push(role && role !== 'student' ? '/admin' : '/learn')
+  }, [user, role, loading, router, explicitRedirect])
 
   function validateForm(): boolean {
     let valid = true
